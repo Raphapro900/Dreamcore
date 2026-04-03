@@ -6,7 +6,7 @@
   <title>DREAMCORE - Bosque Onírico</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-    body { overflow: hidden; background: #000; font-family: 'Courier New', monospace; }
+    body { overflow: hidden; background: #87CEEB; font-family: 'Courier New', monospace; }
     canvas { display: block; position: fixed; top: 0; left: 0; }
 
     /* Overlay de inicio */
@@ -14,38 +14,38 @@
       position: fixed; inset: 0;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      background: radial-gradient(ellipse at center, #080518 0%, #000 100%);
+      background: radial-gradient(ellipse at center, #87CEEB 0%, #6bb5d9 100%);
       z-index: 200; transition: opacity 1.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-      backdrop-filter: blur(2px);
     }
     #overlay.hidden { opacity: 0; pointer-events: none; }
     #overlay h1 {
       font-size: clamp(2.5rem, 8vw, 5rem);
-      letter-spacing: 0.5em; color: #c8b4ff;
-      text-shadow: 0 0 40px #9b6fff, 0 0 80px #6633cc, 0 0 120px #4400aa;
+      letter-spacing: 0.5em; color: #2c3e2f;
+      text-shadow: 0 0 40px #a8d5a2, 0 0 80px #6aab5a;
       animation: glow 3s ease-in-out infinite;
       margin-bottom: 0.4em;
       font-weight: 300;
     }
     @keyframes glow {
-      0%,100% { text-shadow: 0 0 40px #9b6fff, 0 0 80px #6633cc; opacity: 0.9; }
-      50%      { text-shadow: 0 0 70px #c8b4ff, 0 0 140px #9b6fff, 0 0 200px #aa88ff; opacity: 1; }
+      0%,100% { text-shadow: 0 0 40px #a8d5a2, 0 0 80px #6aab5a; opacity: 0.9; }
+      50%      { text-shadow: 0 0 70px #c8e6c0, 0 0 140px #8bc47a; opacity: 1; }
     }
     #overlay .sub {
-      color: #8899cc; letter-spacing: 0.2em; font-size: 0.78rem;
+      color: #2c4a2a; letter-spacing: 0.2em; font-size: 0.78rem;
       margin-bottom: 2.5em; text-align: center; line-height: 2.2;
       text-transform: uppercase;
     }
     #startBtn {
-      padding: 13px 50px; background: transparent;
-      border: 1.5px solid #c8b4ff66; color: #c8b4ff;
+      padding: 13px 50px; background: rgba(255,255,200,0.2);
+      border: 1.5px solid #3a6b2f; color: #2c4a2a;
       font-family: 'Courier New', monospace; font-size: 0.85rem;
       letter-spacing: 0.35em; cursor: pointer; transition: all 0.4s; text-transform: uppercase;
       backdrop-filter: blur(5px);
+      font-weight: bold;
     }
-    #startBtn:hover { background: #c8b4ff1a; border-color: #c8b4ff; box-shadow: 0 0 30px #9b6fff55; letter-spacing: 0.45em; }
+    #startBtn:hover { background: #8bc47a33; border-color: #2c4a2a; box-shadow: 0 0 30px #a8d5a266; letter-spacing: 0.45em; }
 
-    /* UI elementos */
+    /* UI */
     #crosshair {
       position: fixed; top: 50%; left: 50%;
       transform: translate(-50%,-50%);
@@ -53,51 +53,205 @@
       pointer-events: none; z-index: 100; display: none;
     }
     #crosshair::before, #crosshair::after {
-      content: ''; position: absolute; background: rgba(210, 180, 255, 0.7);
-      box-shadow: 0 0 4px #aa88ff;
+      content: ''; position: absolute; background: rgba(60, 80, 40, 0.8);
     }
     #crosshair::before { width: 1.5px; height: 100%; left: 50%; transform: translateX(-50%); }
     #crosshair::after  { width: 100%; height: 1.5px; top: 50%; transform: translateY(-50%); }
     #crosshair .dot {
       position: absolute; top: 50%; left: 50%; width: 3px; height: 3px;
-      background: #d4bcff; border-radius: 50%; transform: translate(-50%, -50%);
+      background: #3a5a2a; border-radius: 50%; transform: translate(-50%, -50%);
     }
 
     #hint {
       position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      color: #c8b4ff66; font-size: 0.6rem; letter-spacing: 0.2em;
+      color: #2c4a2aaa; font-size: 0.6rem; letter-spacing: 0.2em;
       pointer-events: none; z-index: 100; display: none;
-      background: rgba(0,0,0,0.4); padding: 6px 14px; border-radius: 40px;
+      background: rgba(255,255,200,0.5); padding: 6px 14px; border-radius: 40px;
       backdrop-filter: blur(4px);
       white-space: nowrap;
     }
-    #paused {
-      position: fixed; inset: 0; display: none;
-      align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.7); z-index: 150;
-      color: #c8b4ffaa; font-size: 1.3rem; letter-spacing: 0.5em;
-      backdrop-filter: blur(8px);
-    }
-    #paused.show { display: flex; }
 
-    /* Vignette + scanlines (efecto VHS) */
+    /* Pantalla de salida */
+    #exitScreen {
+      position: fixed; inset: 0;
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at center, #0a0a1a 0%, #000 100%);
+      z-index: 300;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+    }
+    #exitScreen.show { display: flex; }
+    #exitScreen h1 {
+      color: #c8b4ff;
+      font-size: 2rem;
+      letter-spacing: 0.3em;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 20px #9b6fff;
+    }
+    #exitScreen p {
+      color: #8899aa;
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+    }
+
+    /* ============================================ */
+    /* EFECTO VHS - ESTILO AMANDA THE ADVENTURER    */
+    /* ============================================ */
+    
+    /* Capa 1: Viñeta oscura fuerte */
     #vignette {
       position: fixed; inset: 0;
-      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.75) 100%);
+      background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.8) 100%);
       pointer-events: none; z-index: 90; display: none;
-      mix-blend-mode: multiply;
     }
-    .vhs-overlay {
+    
+    /* Capa 2: Scanlines muy marcadas */
+    .vhs-scanlines {
       position: fixed; inset: 0;
-      pointer-events: none; z-index: 95;
-      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 2px, transparent 2px, transparent 6px);
-      opacity: 0.5;
+      pointer-events: none; z-index: 91;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.3) 0px,
+        rgba(0, 0, 0, 0.3) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+      opacity: 0.7;
     }
-    .vhs-chromatic {
+    
+    /* Capa 3: Aberración cromática tipo Amanda (rojo/cyan separados) */
+    .vhs-chromatic-red {
       position: fixed; inset: 0;
       pointer-events: none; z-index: 92;
+      background: radial-gradient(ellipse at 50% 50%, rgba(255, 0, 0, 0.15), transparent 70%);
       mix-blend-mode: screen;
-      background: radial-gradient(circle at 30% 40%, rgba(255,0,0,0.08), transparent 60%);
+    }
+    .vhs-chromatic-blue {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 93;
+      background: radial-gradient(ellipse at 48% 50%, rgba(0, 255, 255, 0.15), transparent 70%);
+      mix-blend-mode: screen;
+    }
+    
+    /* Capa 4: Ruido VHS intenso (grano analógico) */
+    .vhs-noise {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 94;
+      opacity: 0.25;
+      background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjkiIG51bU9jdGF2ZXM9IjMiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjZikiIG9wYWNpdHk9IjAuNyIvPjwvc3ZnPg==');
+      background-repeat: repeat;
+      background-size: 150px;
+      animation: vhsNoise 0.2s steps(2) infinite;
+    }
+    
+    /* Capa 5: Glitch/parpadeo tipo cinta dañada */
+    .vhs-glitch {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 95;
+      background: rgba(0,0,0,0);
+      animation: vhsFlicker 0.08s infinite;
+    }
+    
+    /* Capa 6: Líneas de tracking horizontales (muy características de Amanda) */
+    .vhs-tracking-line {
+      position: fixed;
+      left: -10%;
+      width: 120%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.4);
+      pointer-events: none;
+      z-index: 96;
+      box-shadow: 0 0 15px rgba(255,255,200,0.8);
+      animation: trackingSlide 1.5s ease-in-out infinite;
+    }
+    .vhs-tracking-line:nth-child(1) { top: 20%; animation-duration: 2.3s; height: 6px; background: rgba(255,200,100,0.5); }
+    .vhs-tracking-line:nth-child(2) { top: 55%; animation-duration: 1.8s; height: 10px; background: rgba(255,100,150,0.4); }
+    .vhs-tracking-line:nth-child(3) { top: 78%; animation-duration: 3.1s; height: 4px; background: rgba(100,200,255,0.5); }
+    .vhs-tracking-line:nth-child(4) { top: 35%; animation-duration: 1.2s; height: 8px; background: rgba(255,255,255,0.6); }
+    
+    /* Capa 7: Desenfoque de movimiento en bordes */
+    .vhs-motion-blur {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 97;
+      box-shadow: inset 0 0 80px rgba(0,0,0,0.5), inset 0 0 30px rgba(255,0,100,0.2);
+    }
+    
+    /* Capa 8: Barras laterales tipo cinta VHS */
+    .vhs-bars {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      background: rgba(0,0,0,0.6);
+      pointer-events: none;
+      z-index: 98;
+      animation: barGlow 1s ease-in-out infinite;
+    }
+    .vhs-bars.left { left: 0; }
+    .vhs-bars.right { right: 0; }
+    
+    /* Capa 9: Estática tipo Amanda (píxeles blancos/negros) */
+    .vhs-static-overlay {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 99;
+      background: repeating-radial-gradient(circle at 20% 30%, rgba(255,255,255,0.08) 0px, rgba(0,0,0,0.08) 2px, transparent 3px, transparent 8px);
+      animation: staticShift 0.15s steps(3) infinite;
+    }
+    
+    @keyframes vhsNoise {
+      0% { background-position: 0 0; opacity: 0.2; }
+      25% { background-position: 25% 50%; opacity: 0.28; }
+      50% { background-position: 50% 100%; opacity: 0.22; }
+      75% { background-position: 75% 25%; opacity: 0.3; }
+      100% { background-position: 100% 0; opacity: 0.18; }
+    }
+    
+    @keyframes vhsFlicker {
+      0%, 100% { background: rgba(0,0,0,0); }
+      1% { background: rgba(255,255,255,0.12); }
+      2% { background: rgba(0,0,0,0.15); }
+      3% { background: rgba(255,0,0,0.08); }
+      4% { background: rgba(0,255,255,0.08); }
+      5% { background: rgba(0,0,0,0); }
+      48% { background: rgba(0,0,0,0); }
+      49% { background: rgba(255,255,200,0.1); }
+      50% { background: rgba(0,0,0,0.2); }
+      51% { background: rgba(0,0,0,0); }
+      95% { background: rgba(0,0,0,0); }
+      96% { background: rgba(255,0,100,0.05); }
+      97% { background: rgba(0,255,200,0.05); }
+      98% { background: rgba(0,0,0,0.1); }
+    }
+    
+    @keyframes trackingSlide {
+      0% { transform: translateX(-100%); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+    
+    @keyframes barGlow {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; background: rgba(0,0,0,0.8); box-shadow: 0 0 5px rgba(255,255,255,0.3); }
+    }
+    
+    @keyframes staticShift {
+      0% { background-position: 0% 0%; opacity: 0.3; }
+      100% { background-position: 10% 20%; opacity: 0.5; }
+    }
+    
+    /* Efecto de "wobble" en toda la pantalla */
+    .vhs-wobble {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 89;
+      animation: screenWobble 0.12s ease-in-out infinite;
+    }
+    
+    @keyframes screenWobble {
+      0%, 100% { transform: skewX(0deg); }
+      25% { transform: skewX(0.5deg); }
+      75% { transform: skewX(-0.3deg); }
     }
   </style>
 </head>
@@ -107,35 +261,46 @@
   <h1>DREAMCORE</h1>
   <div class="sub">
     ◆ el bosque que no termina ◆<br>
-    <span style="color:#554488aa;font-size:0.9em">✦ explora · escucha · camina ✦</span>
+    <span style="color:#3a6b2faa;font-size:0.9em">✦ explora · escucha · camina ✦</span>
   </div>
   <button id="startBtn">[ entrar al sueño ]</button>
-  <p style="margin-top:2.5rem;font-size:0.6rem;color:#443366aa;letter-spacing:0.2em">
-    🎮 WASD · mover &nbsp;|&nbsp; 🖱️ MOUSE · mirar &nbsp;|&nbsp; ⚡ SHIFT · correr &nbsp;|&nbsp; ⎋ ESC · pausar
+  <p style="margin-top:2.5rem;font-size:0.6rem;color:#3a6b2faa;letter-spacing:0.2em">
+    🎮 WASD · mover &nbsp;|&nbsp; 🖱️ MOUSE · mirar &nbsp;|&nbsp; ⚡ SHIFT · correr &nbsp;|&nbsp; ⎋ ESC · salir
   </p>
 </div>
 
+<div id="exitScreen">
+  <h1>✦ HAS SALIDO DEL SUEÑO ✦</h1>
+  <p>Recarga la página para volver al bosque</p>
+  <p style="margin-top:20px;font-size:0.7rem">[ CTRL + R o F5 ]</p>
+</div>
+
 <div id="crosshair"><div class="dot"></div></div>
-<div id="hint">WASD · mover | SHIFT · correr | ESC · pausar</div>
+<div id="hint">WASD · mover | SHIFT · correr | ESC · salir</div>
+
+<!-- Capas VHS estilo Amanda the Adventurer -->
 <div id="vignette"></div>
-<div class="vhs-overlay"></div>
-<div class="vhs-chromatic"></div>
-<div id="paused">— PAUSA —</div>
+<div class="vhs-scanlines"></div>
+<div class="vhs-chromatic-red"></div>
+<div class="vhs-chromatic-blue"></div>
+<div class="vhs-noise"></div>
+<div class="vhs-glitch"></div>
+<div class="vhs-tracking-line"></div>
+<div class="vhs-tracking-line"></div>
+<div class="vhs-tracking-line"></div>
+<div class="vhs-tracking-line"></div>
+<div class="vhs-motion-blur"></div>
+<div class="vhs-bars left"></div>
+<div class="vhs-bars right"></div>
+<div class="vhs-static-overlay"></div>
+<div class="vhs-wobble"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 // ============================================================
-// CONFIGURACIÓN DE ASSETS (GitHub Pages RAW)
-// CAMBIA 'FranciscoFuentesT/dreamcore' por tu usuario/repo
+// ASSETS - Usando los archivos que ya están en tu GitHub
 // ============================================================
 const ASSETS_BASE = 'https://raw.githubusercontent.com/FranciscoFuentesT/dreamcore/main/';
-
-// Archivos necesarios:
-// - dreamcore.mp3   (música ambiente loop)
-// - deamcore.jpg    (textura de cielo / background)
-// - grass_ps1.jpg   (textura suelo estilo PS1)
-// - tree_ps1.png    (sprite árbol billboard)
-// - pasos.mp3       (sample de pasos)
 
 // ------------------------------------------------------------
 // 1. RENDERER
@@ -148,10 +313,11 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
 // ------------------------------------------------------------
-// 2. ESCENA Y CÁMARA
+// 2. ESCENA Y CÁMARA - DÍA
 // ------------------------------------------------------------
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x040218, 0.022); // niebla densa onírica
+scene.background = new THREE.Color(0x87CEEB);
+scene.fog = new THREE.FogExp2(0xadd8e6, 0.008);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.08, 320);
 camera.position.set(0, 1.75, 0);
@@ -162,13 +328,33 @@ const PI2 = Math.PI / 2;
 let locked = false;
 let gameStarted = false;
 
+// ESC sale de la página
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Escape' && gameStarted) {
+    if (bgMusicElement) {
+      bgMusicElement.pause();
+      bgMusicElement.currentTime = 0;
+    }
+    if (audioContext) {
+      audioContext.close();
+    }
+    document.getElementById('exitScreen').classList.add('show');
+    if (locked) document.exitPointerLock();
+    renderer.domElement.style.display = 'none';
+    document.getElementById('crosshair').style.display = 'none';
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('vignette').style.display = 'none';
+    gameStarted = false;
+    try { window.close(); } catch(e) {}
+  }
+});
+
 // Pointer lock
 document.addEventListener('pointerlockchange', () => {
   locked = document.pointerLockElement === renderer.domElement;
   document.getElementById('crosshair').style.display = locked ? 'block' : 'none';
   document.getElementById('hint').style.display = locked ? 'block' : 'none';
   document.getElementById('vignette').style.display = locked ? 'block' : 'none';
-  if (gameStarted) document.getElementById('paused').classList.toggle('show', !locked);
 });
 
 document.addEventListener('mousemove', (e) => {
@@ -181,57 +367,42 @@ document.addEventListener('mousemove', (e) => {
 
 // Teclado
 const keys = {};
-document.addEventListener('keydown', (e) => {
-  keys[e.code] = true;
-  if (e.code === 'Escape' && gameStarted) {
-    if (locked) document.exitPointerLock();
-    else renderer.domElement.requestPointerLock();
-  }
-});
+document.addEventListener('keydown', (e) => { keys[e.code] = true; });
 document.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
 // ------------------------------------------------------------
-// 3. LUCES (atmósfera psicodélica / crepuscular)
+// 3. LUCES - DÍA
 // ------------------------------------------------------------
-scene.add(new THREE.AmbientLight(0x180c3a, 2.4));
+scene.add(new THREE.AmbientLight(0x8cb0d9, 1.2));
 
-// Linterna (focus)
-const flashlight = new THREE.SpotLight(0xe0ccff, 3.8, 44, Math.PI / 8, 0.6, 1.6);
-flashlight.castShadow = true;
-flashlight.shadow.mapSize.width = 1024;
-flashlight.shadow.mapSize.height = 1024;
-scene.add(flashlight);
-scene.add(flashlight.target);
+const sunLight = new THREE.DirectionalLight(0xfff5e0, 1.4);
+sunLight.position.set(50, 80, -30);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.width = 2048;
+sunLight.shadow.mapSize.height = 2048;
+sunLight.shadow.camera.near = 0.5;
+sunLight.shadow.camera.far = 150;
+sunLight.shadow.camera.left = -30;
+sunLight.shadow.camera.right = 30;
+sunLight.shadow.camera.top = 30;
+sunLight.shadow.camera.bottom = -30;
+scene.add(sunLight);
 
-// Luz lunar / bruma
-const moonLight = new THREE.DirectionalLight(0x99aaff, 0.55);
-moonLight.position.set(-25, 70, -15);
-scene.add(moonLight);
-
-// Luces de hadas flotantes
-const fairyLights = [];
-[ [0xaa66ff, 12, 18], [0x66aaff, -22, -12], [0xff66cc, -15, 26], 
-  [0x88ffaa, 30, -8],  [0xffaa66, -28, -22], [0xcc88ff, 28, 24],
-  [0x66ffff, 5, -35],  [0xff88aa, -35, 5] ].forEach(([color, x, z]) => {
-  const pl = new THREE.PointLight(color, 0.9, 28);
-  pl.position.set(x, 1.5 + Math.random() * 3, z);
-  scene.add(pl);
-  fairyLights.push(pl);
-});
+const fillLight = new THREE.PointLight(0xffcc88, 0.5);
+fillLight.position.set(10, 15, 5);
+scene.add(fillLight);
 
 // ------------------------------------------------------------
-// 4. TEXTURAS CON FALLBACKS (para que nunca falle)
+// 4. TEXTURAS
 // ------------------------------------------------------------
 const texLoader = new THREE.TextureLoader();
 
-// CIELO (deamcore.jpg)
 texLoader.load(ASSETS_BASE + 'deamcore.jpg', 
   (tex) => { scene.background = tex; tex.mapping = THREE.EquirectangularMapping; },
   undefined,
-  () => { console.warn("No se pudo cargar deamcore.jpg, usando cielo nocturno degradado"); scene.background = new THREE.Color(0x030018); }
+  () => { console.warn("deamcore.jpg no cargado"); }
 );
 
-// SUELO (grass_ps1.jpg) con estilo pixelado
 texLoader.load(ASSETS_BASE + 'grass_ps1.jpg', 
   (tex) => {
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -246,26 +417,18 @@ texLoader.load(ASSETS_BASE + 'grass_ps1.jpg',
   },
   undefined,
   () => {
-    console.warn("grass_ps1.jpg no disponible, creando textura procedural");
-    const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#1f3a12'; ctx.fillRect(0, 0, 512, 512);
-    for (let i = 0; i < 1800; i++) {
-      ctx.fillStyle = `rgba(80, 140, 40, ${Math.random() * 0.5})`;
-      ctx.fillRect(Math.floor(Math.random() * 512), Math.floor(Math.random() * 512), 2, 2);
-    }
-    const proceduralTex = new THREE.CanvasTexture(canvas);
-    proceduralTex.wrapS = proceduralTex.wrapT = THREE.RepeatWrapping;
-    proceduralTex.repeat.set(70, 70);
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(620, 620), new THREE.MeshStandardMaterial({ map: proceduralTex, roughness: 0.9 }));
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
+    const groundPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(620, 620),
+      new THREE.MeshStandardMaterial({ color: 0x5a8f4c, roughness: 0.9 })
+    );
+    groundPlane.rotation.x = -Math.PI / 2;
+    groundPlane.receiveShadow = true;
+    scene.add(groundPlane);
   }
 );
 
 // ------------------------------------------------------------
-// 5. ÁRBOLES BILLBOARD (estilo retro/ps1)
+// 5. ÁRBOLES BILLBOARD
 // ------------------------------------------------------------
 const trees = [];
 texLoader.load(ASSETS_BASE + 'tree_ps1.png',
@@ -273,7 +436,7 @@ texLoader.load(ASSETS_BASE + 'tree_ps1.png',
     tex.magFilter = THREE.NearestFilter;
     tex.minFilter = THREE.NearestFilter;
     const leafMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.1 });
-    for (let i = 0; i < 155; i++) {
+    for (let i = 0; i < 160; i++) {
       const scaleTree = 0.7 + Math.random() * 0.9;
       const planeGeo = new THREE.PlaneGeometry(5.6 * scaleTree, 11.2 * scaleTree);
       const treeMesh = new THREE.Mesh(planeGeo, leafMat);
@@ -286,138 +449,96 @@ texLoader.load(ASSETS_BASE + 'tree_ps1.png',
     }
   },
   undefined,
-  () => {
-    console.warn("tree_ps1.png no cargado, usando árboles de cartón con canvas");
-    const createPixelTreeTexture = () => {
-      const cv = document.createElement('canvas'); cv.width = 128; cv.height = 256;
-      const ct = cv.getContext('2d');
-      ct.fillStyle = '#2f4d1a'; ct.fillRect(0, 0, 128, 256);
-      ct.fillStyle = '#4a2a12'; ct.fillRect(48, 150, 32, 106);
-      ct.fillStyle = '#2c6e1a'; ct.beginPath(); ct.moveTo(64, 20); ct.lineTo(20, 100); ct.lineTo(108, 100); ct.fill();
-      ct.fillStyle = '#3c8720'; ct.beginPath(); ct.moveTo(64, 50); ct.lineTo(28, 120); ct.lineTo(100, 120); ct.fill();
-      ct.fillStyle = '#52a32a'; ct.beginPath(); ct.moveTo(64, 80); ct.lineTo(36, 140); ct.lineTo(92, 140); ct.fill();
-      return new THREE.CanvasTexture(cv);
-    };
-    const fallbackTex = createPixelTreeTexture();
-    fallbackTex.magFilter = THREE.NearestFilter;
-    const matTree = new THREE.MeshBasicMaterial({ map: fallbackTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.1 });
-    for (let i = 0; i < 140; i++) {
-      const s = 0.8 + Math.random() * 0.8;
-      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(5.2 * s, 10.4 * s), matTree);
-      let x, z;
-      do { x = (Math.random() - 0.5) * 280; z = (Math.random() - 0.5) * 280; }
-      while (Math.hypot(x, z) < 12);
-      mesh.position.set(x, 5 * s, z);
-      scene.add(mesh);
-      trees.push(mesh);
-    }
-  }
+  () => { console.warn("tree_ps1.png no cargado"); }
 );
 
-// Ruinas / monolitos
-const ruinMat = new THREE.MeshStandardMaterial({ color: 0x231a3a, emissive: 0x110522, roughness: 0.6 });
-for (let i = 0; i < 25; i++) {
-  const h = 2.2 + Math.random() * 6;
-  const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.65, h, 5), ruinMat);
-  const angle = Math.random() * Math.PI * 2;
-  const rad = 25 + Math.random() * 140;
-  const x = Math.cos(angle) * rad * (Math.random() > 0.5 ? 1 : -1);
-  const z = Math.sin(angle) * rad;
-  pillar.position.set(x, h / 2, z);
-  pillar.castShadow = true;
-  scene.add(pillar);
+// Elementos decorativos
+const rockMat = new THREE.MeshStandardMaterial({ color: 0x8a8a7a, roughness: 0.8 });
+for (let i = 0; i < 200; i++) {
+  const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.12 + Math.random() * 0.15), rockMat);
+  const x = (Math.random() - 0.5) * 280;
+  const z = (Math.random() - 0.5) * 280;
+  if (Math.hypot(x, z) > 8) {
+    rock.position.set(x, 0.1, z);
+    rock.scale.set(1, Math.random() * 0.6 + 0.4, 1);
+    rock.castShadow = true;
+    rock.receiveShadow = true;
+    scene.add(rock);
+  }
 }
 
-// Orbes flotantes (misterios)
-const floatingOrbs = [];
-const colorsOrb = [0xff99cc, 0x99ccff, 0xffdd99, 0xcc99ff, 0xaaffdd];
-for (let i = 0; i < 18; i++) {
-  const col = colorsOrb[i % colorsOrb.length];
-  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 12), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.5 }));
-  orb.position.set((Math.random() - 0.5) * 180, 0.9 + Math.random() * 4.5, (Math.random() - 0.5) * 180);
-  orb.castShadow = true;
-  const lightOrb = new THREE.PointLight(col, 0.9, 10);
-  orb.add(lightOrb);
-  orb.userData = { baseY: orb.position.y, speed: 0.7 + Math.random() * 0.6, phase: Math.random() * Math.PI * 2 };
-  scene.add(orb);
-  floatingOrbs.push(orb);
+// Partículas flotantes
+const particleCount = 800;
+const particleGeo = new THREE.BufferGeometry();
+const particlePositions = [];
+for (let i = 0; i < particleCount; i++) {
+  particlePositions.push((Math.random() - 0.5) * 300);
+  particlePositions.push(Math.random() * 6);
+  particlePositions.push((Math.random() - 0.5) * 280);
 }
-
-// Partículas estelares (nieve / polvo onírico)
-const starFieldGeo = new THREE.BufferGeometry();
-const starCount = 1800;
-const starPos = [];
-for (let i = 0; i < starCount; i++) {
-  starPos.push((Math.random() - 0.5) * 400);
-  starPos.push((Math.random() - 0.5) * 120 + 10);
-  starPos.push((Math.random() - 0.5) * 350 - 50);
-}
-starFieldGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starPos), 3));
-const starMat = new THREE.PointsMaterial({ color: 0xcceeff, size: 0.12, transparent: true, opacity: 0.6 });
-const stars = new THREE.Points(starFieldGeo, starMat);
-scene.add(stars);
+particleGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(particlePositions), 3));
+const particleMat = new THREE.PointsMaterial({ color: 0xffdd99, size: 0.05, transparent: true, opacity: 0.5 });
+const particles = new THREE.Points(particleGeo, particleMat);
+scene.add(particles);
 
 // ------------------------------------------------------------
-// 6. AUDIO: MÚSICA + PASOS CON PITCH RANDOM (efecto realista)
+// 6. AUDIO
 // ------------------------------------------------------------
 let audioContext = null;
 let bgMusicElement = null;
 let stepBuffer = null;
 let stepCooldown = false;
-const STEP_WALK_DELAY = 390;   // ms
-const STEP_RUN_DELAY = 260;
+const STEP_WALK_DELAY = 380;
+const STEP_RUN_DELAY = 250;
 
 function initAudioSystem() {
   try {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    // Música de fondo (loop HTMLAudioElement para menor latencia y loop nativo)
+    
     bgMusicElement = new Audio(ASSETS_BASE + 'dreamcore.mp3');
     bgMusicElement.loop = true;
-    bgMusicElement.volume = 0.48;
-    bgMusicElement.play().catch(e => console.warn("Autoplay bloqueado, se iniciará con interacción", e));
+    bgMusicElement.volume = 0.5;
+    bgMusicElement.play().catch(e => console.warn("Audio autoplay bloqueado", e));
     
-    // Cargar pasos
     fetch(ASSETS_BASE + 'pasos.mp3')
       .then(res => res.arrayBuffer())
       .then(buf => audioContext.decodeAudioData(buf))
-      .then(decoded => { stepBuffer = decoded; })
-      .catch(err => console.warn("No se pudo cargar pasos.mp3, sonido de pasos desactivado", err));
+      .then(decoded => { stepBuffer = decoded; console.log("✅ pasos.mp3 cargado"); })
+      .catch(err => console.warn("pasos.mp3 no cargado", err));
   } catch(e) { console.warn("Web Audio API no soportada", e); }
 }
 
 function playFootstep(running) {
   if (!audioContext || !stepBuffer || stepCooldown) return;
+  
   stepCooldown = true;
   setTimeout(() => { stepCooldown = false; }, running ? STEP_RUN_DELAY : STEP_WALK_DELAY);
   
   const source = audioContext.createBufferSource();
   source.buffer = stepBuffer;
-  // Pitch random entre 0.88 y 1.12 -> efecto psicodélico / sueño
-  const pitchVar = 0.88 + Math.random() * 0.24;
+  const pitchVar = 0.85 + Math.random() * 0.3;
   source.playbackRate.value = pitchVar;
   
   const gainNode = audioContext.createGain();
-  gainNode.gain.value = 0.55 + Math.random() * 0.2;
+  gainNode.gain.value = 0.6 + Math.random() * 0.2;
   source.connect(gainNode);
   gainNode.connect(audioContext.destination);
   source.start();
 }
 
 // ------------------------------------------------------------
-// 7. GAME LOOP con movimiento + headbob + actualización orbes / luces
+// 7. GAME LOOP
 // ------------------------------------------------------------
 const moveVec = new THREE.Vector3();
 const forwardDir = new THREE.Vector3();
 const rightDir = new THREE.Vector3();
-let clockLoop = new THREE.Clock();
 let bobCounter = 0;
-let lastMoveState = false;
 
 function updateMovement(deltaTime) {
   if (!locked || !gameStarted) return;
   
   const running = (keys['ShiftLeft'] || keys['ShiftRight']);
-  const currentSpeed = running ? 7.2 : 4.1;
+  const currentSpeed = running ? 7.0 : 4.0;
   let isMoving = false;
   
   moveVec.set(0, 0, 0);
@@ -434,79 +555,46 @@ function updateMovement(deltaTime) {
   if (isMoving) {
     moveVec.normalize();
     camera.position.addScaledVector(moveVec, currentSpeed * deltaTime);
-    // Pasos con pitch aleatorio
     playFootstep(running);
     
-    // Headbob onítico sutil
-    bobCounter += deltaTime * (running ? 11.5 : 7.8);
-    camera.position.y = 1.72 + Math.sin(bobCounter) * 0.032;
+    bobCounter += deltaTime * (running ? 11 : 7.5);
+    camera.position.y = 1.72 + Math.sin(bobCounter) * 0.03;
   } else {
     camera.position.y += (1.72 - camera.position.y) * 0.12;
   }
   
-  // Colisión suave con bordes del sueño
   camera.position.x = Math.min(275, Math.max(-275, camera.position.x));
   camera.position.z = Math.min(275, Math.max(-275, camera.position.z));
 }
 
-// Linterna sigue la cámara
-function updateFlashlight() {
-  flashlight.position.copy(camera.position);
-  const lookDir = new THREE.Vector3();
-  camera.getWorldDirection(lookDir);
-  flashlight.target.position.copy(camera.position).addScaledVector(lookDir, 6);
-  flashlight.target.updateMatrixWorld();
-}
-
-// Animación de orbes y luces flotantes
-let globalTime = 0;
-function updateWorldAnimations(delta) {
-  globalTime += delta;
-  floatingOrbs.forEach((orb, idx) => {
-    const offsetY = Math.sin(globalTime * 1.2 + orb.userData.phase) * 0.4;
-    orb.position.y = orb.userData.baseY + offsetY;
-    orb.rotation.x += 0.02;
-    orb.rotation.z += 0.015;
-  });
-  fairyLights.forEach((light, i) => {
-    light.intensity = 0.7 + Math.sin(globalTime * 1.5 + i) * 0.4;
-  });
-  // Estrellas rotación lenta
-  stars.rotation.y += 0.0008;
-}
-
-// Árboles billboard (siempre miran a cámara en Y)
 function updateBillboards() {
   const camPos = camera.position;
   trees.forEach(tree => {
-    tree.lookAt(camPos.x, tree.position.y, camPos.z);
+    if(tree) tree.lookAt(camPos.x, tree.position.y, camPos.z);
   });
 }
 
-// ------------------------------------------------------------
-// 8. EFECTO VHS DINÁMICO (chromatic aberration y scanlines en CSS)
-//    Ya añadido en HTML .vhs-overlay y .vhs-chromatic
-// ------------------------------------------------------------
-let vhsIntensity = 0;
-function updateVHSEffect(delta) {
-  // Pequeña vibración aleatoria en el overlay cromático
-  const chromaticDiv = document.querySelector('.vhs-chromatic');
-  if (chromaticDiv && locked) {
-    const shakeX = (Math.random() - 0.5) * 2;
-    const shakeY = (Math.random() - 0.5) * 1.5;
-    chromaticDiv.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
-    setTimeout(() => { if(chromaticDiv) chromaticDiv.style.transform = ''; }, 60);
-  }
-  // Variación opacidad scanlines
-  const scanDiv = document.querySelector('.vhs-overlay');
-  if (scanDiv && locked) {
-    const flicker = 0.4 + Math.random() * 0.2;
-    scanDiv.style.opacity = flicker;
+function updateParticles(delta) {
+  particles.rotation.y += 0.005;
+}
+
+// Efecto VHS dinámico adicional (movimiento de aberración tipo Amanda)
+let vhsTime = 0;
+function updateVHSDynamic(delta) {
+  vhsTime += delta;
+  const redLayer = document.querySelector('.vhs-chromatic-red');
+  const blueLayer = document.querySelector('.vhs-chromatic-blue');
+  if (redLayer && blueLayer && locked) {
+    // Movimiento errático tipo cinta dañada
+    const shakeX = Math.sin(vhsTime * 45) * 2.5 + Math.cos(vhsTime * 31) * 1.2;
+    const shakeY = Math.cos(vhsTime * 38) * 1.8;
+    redLayer.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
+    blueLayer.style.transform = `translate(${-shakeX * 1.2}px, ${-shakeY * 0.7}px)`;
   }
 }
 
 // ------------------------------------------------------------
-// 9. INICIO DEL JUEGO
+// 8. INICIO
 // ------------------------------------------------------------
 document.getElementById('startBtn').addEventListener('click', () => {
   if (gameStarted) return;
@@ -514,18 +602,18 @@ document.getElementById('startBtn').addEventListener('click', () => {
   gameStarted = true;
   const overlayDiv = document.getElementById('overlay');
   overlayDiv.classList.add('hidden');
+  renderer.domElement.style.display = 'block';
   setTimeout(() => {
     renderer.domElement.requestPointerLock();
   }, 200);
 });
 
-// click para reconectar pointer si es necesario
 renderer.domElement.addEventListener('click', () => {
   if (gameStarted && !locked) renderer.domElement.requestPointerLock();
 });
 
 // ------------------------------------------------------------
-// 10. BUCLE PRINCIPAL DE ANIMACIÓN
+// 9. BUCLE PRINCIPAL
 // ------------------------------------------------------------
 let lastTime = performance.now();
 function mainLoop() {
@@ -534,28 +622,28 @@ function mainLoop() {
   lastTime = now;
   if (delta < 0.003) delta = 0.016;
   
-  if (gameStarted) {
+  if (gameStarted && locked) {
     updateMovement(delta);
-    updateFlashlight();
-    updateWorldAnimations(delta);
     updateBillboards();
-    updateVHSEffect(delta);
+    updateParticles(delta);
+    updateVHSDynamic(delta);
   }
   
-  renderer.render(scene, camera);
+  if (gameStarted) {
+    renderer.render(scene, camera);
+  }
   requestAnimationFrame(mainLoop);
 }
 
 mainLoop();
 
-// Redimensionamiento
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-console.log("✨ DREAMCORE activado — Bosque infinito, VHS y pasos con pitch aleatorio ✨");
+console.log("🌞 DREAMCORE - VHS estilo Amanda the Adventurer | ESC sale | Pasos con pitch");
 </script>
 </body>
 </html>
