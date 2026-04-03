@@ -6,7 +6,7 @@
   <title>DREAMCORE - Bosque Onírico</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-    body { overflow: hidden; background: #87CEEB; font-family: 'Courier New', monospace; }
+    body { overflow: hidden; background: #000; font-family: 'Courier New', monospace; }
     canvas { display: block; position: fixed; top: 0; left: 0; }
 
     /* Overlay de inicio */
@@ -14,36 +14,32 @@
       position: fixed; inset: 0;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      background: radial-gradient(ellipse at center, #87CEEB 0%, #6bb5d9 100%);
-      z-index: 200; transition: opacity 1.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      background: radial-gradient(ellipse at center, #0a0a2a 0%, #000 100%);
+      z-index: 200; transition: opacity 1.5s;
     }
     #overlay.hidden { opacity: 0; pointer-events: none; }
     #overlay h1 {
       font-size: clamp(2.5rem, 8vw, 5rem);
-      letter-spacing: 0.5em; color: #2c3e2f;
-      text-shadow: 0 0 40px #a8d5a2, 0 0 80px #6aab5a;
+      letter-spacing: 0.5em; color: #c8b4ff;
+      text-shadow: 0 0 40px #9b6fff, 0 0 80px #6633cc;
       animation: glow 3s ease-in-out infinite;
       margin-bottom: 0.4em;
-      font-weight: 300;
     }
     @keyframes glow {
-      0%,100% { text-shadow: 0 0 40px #a8d5a2, 0 0 80px #6aab5a; opacity: 0.9; }
-      50%      { text-shadow: 0 0 70px #c8e6c0, 0 0 140px #8bc47a; opacity: 1; }
+      0%,100% { text-shadow: 0 0 40px #9b6fff, 0 0 80px #6633cc; }
+      50% { text-shadow: 0 0 70px #c8b4ff, 0 0 140px #9b6fff; }
     }
     #overlay .sub {
-      color: #2c4a2a; letter-spacing: 0.2em; font-size: 0.78rem;
-      margin-bottom: 2.5em; text-align: center; line-height: 2.2;
-      text-transform: uppercase;
+      color: #8899cc; letter-spacing: 0.2em; font-size: 0.78rem;
+      margin-bottom: 2.5em; text-align: center;
     }
     #startBtn {
-      padding: 13px 50px; background: rgba(255,255,200,0.2);
-      border: 1.5px solid #3a6b2f; color: #2c4a2a;
+      padding: 13px 50px; background: transparent;
+      border: 1.5px solid #c8b4ff66; color: #c8b4ff;
       font-family: 'Courier New', monospace; font-size: 0.85rem;
-      letter-spacing: 0.35em; cursor: pointer; transition: all 0.4s; text-transform: uppercase;
-      backdrop-filter: blur(5px);
-      font-weight: bold;
+      letter-spacing: 0.35em; cursor: pointer; transition: all 0.4s;
     }
-    #startBtn:hover { background: #8bc47a33; border-color: #2c4a2a; box-shadow: 0 0 30px #a8d5a266; letter-spacing: 0.45em; }
+    #startBtn:hover { background: #c8b4ff1a; border-color: #c8b4ff; box-shadow: 0 0 30px #9b6fff55; }
 
     /* UI */
     #crosshair {
@@ -53,21 +49,16 @@
       pointer-events: none; z-index: 100; display: none;
     }
     #crosshair::before, #crosshair::after {
-      content: ''; position: absolute; background: rgba(60, 80, 40, 0.8);
+      content: ''; position: absolute; background: rgba(200,180,255,0.7);
     }
     #crosshair::before { width: 1.5px; height: 100%; left: 50%; transform: translateX(-50%); }
-    #crosshair::after  { width: 100%; height: 1.5px; top: 50%; transform: translateY(-50%); }
-    #crosshair .dot {
-      position: absolute; top: 50%; left: 50%; width: 3px; height: 3px;
-      background: #3a5a2a; border-radius: 50%; transform: translate(-50%, -50%);
-    }
+    #crosshair::after { width: 100%; height: 1.5px; top: 50%; transform: translateY(-50%); }
 
     #hint {
       position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      color: #2c4a2aaa; font-size: 0.6rem; letter-spacing: 0.2em;
+      color: #c8b4ff88; font-size: 0.6rem; letter-spacing: 0.2em;
       pointer-events: none; z-index: 100; display: none;
-      background: rgba(255,255,200,0.5); padding: 6px 14px; border-radius: 40px;
-      backdrop-filter: blur(4px);
+      background: rgba(0,0,0,0.5); padding: 6px 14px; border-radius: 40px;
       white-space: nowrap;
     }
 
@@ -82,146 +73,106 @@
       text-align: center;
     }
     #exitScreen.show { display: flex; }
-    #exitScreen h1 {
-      color: #c8b4ff;
-      font-size: 2rem;
-      letter-spacing: 0.3em;
-      margin-bottom: 1rem;
-      text-shadow: 0 0 20px #9b6fff;
-    }
-    #exitScreen p {
-      color: #8899aa;
-      font-size: 0.8rem;
-      letter-spacing: 0.2em;
-    }
+    #exitScreen h1 { color: #c8b4ff; font-size: 2rem; letter-spacing: 0.3em; margin-bottom: 1rem; text-shadow: 0 0 20px #9b6fff; }
+    #exitScreen p { color: #8899aa; font-size: 0.8rem; letter-spacing: 0.2em; }
 
     /* ============================================ */
     /* EFECTO VHS - ESTILO AMANDA THE ADVENTURER    */
     /* ============================================ */
     
-    /* Capa 1: Viñeta oscura fuerte */
-    #vignette {
+    .vhs-vignette {
       position: fixed; inset: 0;
-      background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.8) 100%);
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
       pointer-events: none; z-index: 90; display: none;
     }
     
-    /* Capa 2: Scanlines muy marcadas */
     .vhs-scanlines {
       position: fixed; inset: 0;
       pointer-events: none; z-index: 91;
-      background: repeating-linear-gradient(
-        0deg,
-        rgba(0, 0, 0, 0.3) 0px,
-        rgba(0, 0, 0, 0.3) 1px,
-        transparent 1px,
-        transparent 3px
-      );
-      opacity: 0.7;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.3) 0px, rgba(0,0,0,0.3) 2px, transparent 2px, transparent 5px);
+      opacity: 0.6;
     }
     
-    /* Capa 3: Aberración cromática tipo Amanda (rojo/cyan separados) */
-    .vhs-chromatic-red {
+    .vhs-chromatic {
       position: fixed; inset: 0;
       pointer-events: none; z-index: 92;
-      background: radial-gradient(ellipse at 50% 50%, rgba(255, 0, 0, 0.15), transparent 70%);
+    }
+    .vhs-chromatic-red {
+      position: absolute; inset: -2px;
+      background: rgba(255, 0, 0, 0.1);
       mix-blend-mode: screen;
+      pointer-events: none;
     }
     .vhs-chromatic-blue {
-      position: fixed; inset: 0;
-      pointer-events: none; z-index: 93;
-      background: radial-gradient(ellipse at 48% 50%, rgba(0, 255, 255, 0.15), transparent 70%);
+      position: absolute; inset: -2px;
+      background: rgba(0, 255, 255, 0.1);
       mix-blend-mode: screen;
+      pointer-events: none;
     }
     
-    /* Capa 4: Ruido VHS intenso (grano analógico) */
     .vhs-noise {
       position: fixed; inset: 0;
-      pointer-events: none; z-index: 94;
-      opacity: 0.25;
-      background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjkiIG51bU9jdGF2ZXM9IjMiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjZikiIG9wYWNpdHk9IjAuNyIvPjwvc3ZnPg==');
+      pointer-events: none; z-index: 93;
+      opacity: 0.2;
+      background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjkiIG51bU9jdGF2ZXM9IjMiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjZikiIG9wYWNpdHk9IjAuNSIvPjwvc3ZnPg==');
       background-repeat: repeat;
-      background-size: 150px;
-      animation: vhsNoise 0.2s steps(2) infinite;
+      background-size: 200px;
+      animation: noiseAnim 0.2s steps(2) infinite;
     }
     
-    /* Capa 5: Glitch/parpadeo tipo cinta dañada */
     .vhs-glitch {
       position: fixed; inset: 0;
-      pointer-events: none; z-index: 95;
+      pointer-events: none; z-index: 94;
       background: rgba(0,0,0,0);
-      animation: vhsFlicker 0.08s infinite;
+      animation: glitchFlicker 0.12s infinite;
     }
     
-    /* Capa 6: Líneas de tracking horizontales (muy características de Amanda) */
-    .vhs-tracking-line {
+    .vhs-tracking {
       position: fixed;
-      left: -10%;
-      width: 120%;
-      height: 12px;
-      background: rgba(255, 255, 255, 0.4);
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: rgba(255,255,255,0.3);
       pointer-events: none;
-      z-index: 96;
-      box-shadow: 0 0 15px rgba(255,255,200,0.8);
-      animation: trackingSlide 1.5s ease-in-out infinite;
+      z-index: 95;
+      box-shadow: 0 0 10px rgba(255,255,200,0.5);
+      animation: trackingSlide 2s linear infinite;
     }
-    .vhs-tracking-line:nth-child(1) { top: 20%; animation-duration: 2.3s; height: 6px; background: rgba(255,200,100,0.5); }
-    .vhs-tracking-line:nth-child(2) { top: 55%; animation-duration: 1.8s; height: 10px; background: rgba(255,100,150,0.4); }
-    .vhs-tracking-line:nth-child(3) { top: 78%; animation-duration: 3.1s; height: 4px; background: rgba(100,200,255,0.5); }
-    .vhs-tracking-line:nth-child(4) { top: 35%; animation-duration: 1.2s; height: 8px; background: rgba(255,255,255,0.6); }
+    .vhs-tracking:nth-child(1) { top: 15%; animation-duration: 2.5s; height: 8px; background: rgba(255,200,100,0.4); }
+    .vhs-tracking:nth-child(2) { top: 45%; animation-duration: 1.8s; height: 5px; background: rgba(255,100,150,0.3); }
+    .vhs-tracking:nth-child(3) { top: 70%; animation-duration: 3.2s; height: 10px; background: rgba(100,200,255,0.4); }
+    .vhs-tracking:nth-child(4) { top: 85%; animation-duration: 1.2s; height: 4px; background: rgba(255,255,255,0.5); }
     
-    /* Capa 7: Desenfoque de movimiento en bordes */
-    .vhs-motion-blur {
-      position: fixed; inset: 0;
-      pointer-events: none; z-index: 97;
-      box-shadow: inset 0 0 80px rgba(0,0,0,0.5), inset 0 0 30px rgba(255,0,100,0.2);
-    }
-    
-    /* Capa 8: Barras laterales tipo cinta VHS */
     .vhs-bars {
       position: fixed;
       top: 0;
       bottom: 0;
-      width: 8px;
-      background: rgba(0,0,0,0.6);
+      width: 6px;
+      background: rgba(0,0,0,0.5);
       pointer-events: none;
-      z-index: 98;
-      animation: barGlow 1s ease-in-out infinite;
+      z-index: 96;
     }
     .vhs-bars.left { left: 0; }
     .vhs-bars.right { right: 0; }
     
-    /* Capa 9: Estática tipo Amanda (píxeles blancos/negros) */
-    .vhs-static-overlay {
-      position: fixed; inset: 0;
-      pointer-events: none; z-index: 99;
-      background: repeating-radial-gradient(circle at 20% 30%, rgba(255,255,255,0.08) 0px, rgba(0,0,0,0.08) 2px, transparent 3px, transparent 8px);
-      animation: staticShift 0.15s steps(3) infinite;
-    }
-    
-    @keyframes vhsNoise {
-      0% { background-position: 0 0; opacity: 0.2; }
-      25% { background-position: 25% 50%; opacity: 0.28; }
-      50% { background-position: 50% 100%; opacity: 0.22; }
-      75% { background-position: 75% 25%; opacity: 0.3; }
+    @keyframes noiseAnim {
+      0% { background-position: 0 0; opacity: 0.15; }
+      25% { background-position: 25% 50%; opacity: 0.25; }
+      50% { background-position: 50% 100%; opacity: 0.2; }
+      75% { background-position: 75% 25%; opacity: 0.28; }
       100% { background-position: 100% 0; opacity: 0.18; }
     }
     
-    @keyframes vhsFlicker {
+    @keyframes glitchFlicker {
       0%, 100% { background: rgba(0,0,0,0); }
-      1% { background: rgba(255,255,255,0.12); }
-      2% { background: rgba(0,0,0,0.15); }
-      3% { background: rgba(255,0,0,0.08); }
-      4% { background: rgba(0,255,255,0.08); }
-      5% { background: rgba(0,0,0,0); }
-      48% { background: rgba(0,0,0,0); }
-      49% { background: rgba(255,255,200,0.1); }
-      50% { background: rgba(0,0,0,0.2); }
-      51% { background: rgba(0,0,0,0); }
-      95% { background: rgba(0,0,0,0); }
-      96% { background: rgba(255,0,100,0.05); }
-      97% { background: rgba(0,255,200,0.05); }
-      98% { background: rgba(0,0,0,0.1); }
+      2% { background: rgba(255,255,255,0.15); }
+      4% { background: rgba(0,0,0,0.1); }
+      6% { background: rgba(255,0,0,0.08); }
+      8% { background: rgba(0,0,0,0); }
+      50% { background: rgba(0,0,0,0); }
+      52% { background: rgba(0,255,255,0.08); }
+      54% { background: rgba(0,0,0,0.15); }
+      56% { background: rgba(0,0,0,0); }
     }
     
     @keyframes trackingSlide {
@@ -230,94 +181,64 @@
       90% { opacity: 1; }
       100% { transform: translateX(100%); opacity: 0; }
     }
-    
-    @keyframes barGlow {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; background: rgba(0,0,0,0.8); box-shadow: 0 0 5px rgba(255,255,255,0.3); }
-    }
-    
-    @keyframes staticShift {
-      0% { background-position: 0% 0%; opacity: 0.3; }
-      100% { background-position: 10% 20%; opacity: 0.5; }
-    }
-    
-    /* Efecto de "wobble" en toda la pantalla */
-    .vhs-wobble {
-      position: fixed; inset: 0;
-      pointer-events: none; z-index: 89;
-      animation: screenWobble 0.12s ease-in-out infinite;
-    }
-    
-    @keyframes screenWobble {
-      0%, 100% { transform: skewX(0deg); }
-      25% { transform: skewX(0.5deg); }
-      75% { transform: skewX(-0.3deg); }
-    }
   </style>
 </head>
 <body>
 
 <div id="overlay">
   <h1>DREAMCORE</h1>
-  <div class="sub">
-    ◆ el bosque que no termina ◆<br>
-    <span style="color:#3a6b2faa;font-size:0.9em">✦ explora · escucha · camina ✦</span>
-  </div>
+  <div class="sub">◆ el bosque que no termina ◆</div>
   <button id="startBtn">[ entrar al sueño ]</button>
-  <p style="margin-top:2.5rem;font-size:0.6rem;color:#3a6b2faa;letter-spacing:0.2em">
-    🎮 WASD · mover &nbsp;|&nbsp; 🖱️ MOUSE · mirar &nbsp;|&nbsp; ⚡ SHIFT · correr &nbsp;|&nbsp; ⎋ ESC · salir
+  <p style="margin-top:2.5rem;font-size:0.6rem;color:#443366aa;letter-spacing:0.2em">
+    WASD · mover | MOUSE · mirar | SHIFT · correr | ESC · salir
   </p>
 </div>
 
 <div id="exitScreen">
   <h1>✦ HAS SALIDO DEL SUEÑO ✦</h1>
   <p>Recarga la página para volver al bosque</p>
-  <p style="margin-top:20px;font-size:0.7rem">[ CTRL + R o F5 ]</p>
 </div>
 
 <div id="crosshair"><div class="dot"></div></div>
 <div id="hint">WASD · mover | SHIFT · correr | ESC · salir</div>
 
-<!-- Capas VHS estilo Amanda the Adventurer -->
-<div id="vignette"></div>
+<!-- Capas VHS -->
+<div class="vhs-vignette" id="vignette"></div>
 <div class="vhs-scanlines"></div>
-<div class="vhs-chromatic-red"></div>
-<div class="vhs-chromatic-blue"></div>
+<div class="vhs-chromatic">
+  <div class="vhs-chromatic-red" id="chromaRed"></div>
+  <div class="vhs-chromatic-blue" id="chromaBlue"></div>
+</div>
 <div class="vhs-noise"></div>
 <div class="vhs-glitch"></div>
-<div class="vhs-tracking-line"></div>
-<div class="vhs-tracking-line"></div>
-<div class="vhs-tracking-line"></div>
-<div class="vhs-tracking-line"></div>
-<div class="vhs-motion-blur"></div>
+<div class="vhs-tracking"></div>
+<div class="vhs-tracking"></div>
+<div class="vhs-tracking"></div>
+<div class="vhs-tracking"></div>
 <div class="vhs-bars left"></div>
 <div class="vhs-bars right"></div>
-<div class="vhs-static-overlay"></div>
-<div class="vhs-wobble"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 // ============================================================
-// ASSETS - Usando los archivos que ya están en tu GitHub
+// ASSETS - GitHub
 // ============================================================
 const ASSETS_BASE = 'https://raw.githubusercontent.com/FranciscoFuentesT/dreamcore/main/';
 
 // ------------------------------------------------------------
-// 1. RENDERER
+// RENDERER
 // ------------------------------------------------------------
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
 // ------------------------------------------------------------
-// 2. ESCENA Y CÁMARA - DÍA
+// ESCENA Y CÁMARA
 // ------------------------------------------------------------
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87CEEB);
-scene.fog = new THREE.FogExp2(0xadd8e6, 0.008);
+scene.fog = new THREE.FogExp2(0x87CEEB, 0.008);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.08, 320);
 camera.position.set(0, 1.75, 0);
@@ -328,16 +249,11 @@ const PI2 = Math.PI / 2;
 let locked = false;
 let gameStarted = false;
 
-// ESC sale de la página
+// ESC - sale de la página
 document.addEventListener('keydown', (e) => {
   if (e.code === 'Escape' && gameStarted) {
-    if (bgMusicElement) {
-      bgMusicElement.pause();
-      bgMusicElement.currentTime = 0;
-    }
-    if (audioContext) {
-      audioContext.close();
-    }
+    if (bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
+    if (audioContext) { audioContext.close(); }
     document.getElementById('exitScreen').classList.add('show');
     if (locked) document.exitPointerLock();
     renderer.domElement.style.display = 'none';
@@ -371,241 +287,217 @@ document.addEventListener('keydown', (e) => { keys[e.code] = true; });
 document.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
 // ------------------------------------------------------------
-// 3. LUCES - DÍA
+// LUCES
 // ------------------------------------------------------------
 scene.add(new THREE.AmbientLight(0x8cb0d9, 1.2));
 
-const sunLight = new THREE.DirectionalLight(0xfff5e0, 1.4);
+const sunLight = new THREE.DirectionalLight(0xfff5e0, 1.2);
 sunLight.position.set(50, 80, -30);
 sunLight.castShadow = true;
-sunLight.shadow.mapSize.width = 2048;
-sunLight.shadow.mapSize.height = 2048;
-sunLight.shadow.camera.near = 0.5;
-sunLight.shadow.camera.far = 150;
-sunLight.shadow.camera.left = -30;
-sunLight.shadow.camera.right = 30;
-sunLight.shadow.camera.top = 30;
-sunLight.shadow.camera.bottom = -30;
+sunLight.shadow.mapSize.width = 1024;
+sunLight.shadow.mapSize.height = 1024;
 scene.add(sunLight);
 
-const fillLight = new THREE.PointLight(0xffcc88, 0.5);
-fillLight.position.set(10, 15, 5);
-scene.add(fillLight);
-
 // ------------------------------------------------------------
-// 4. TEXTURAS
+// CIELO - deamcore.jpg
 // ------------------------------------------------------------
 const texLoader = new THREE.TextureLoader();
-
 texLoader.load(ASSETS_BASE + 'deamcore.jpg', 
   (tex) => { scene.background = tex; tex.mapping = THREE.EquirectangularMapping; },
   undefined,
-  () => { console.warn("deamcore.jpg no cargado"); }
+  () => { scene.background = new THREE.Color(0x87CEEB); }
 );
 
+// ------------------------------------------------------------
+// SUELO - grass_ps1.jpg
+// ------------------------------------------------------------
 texLoader.load(ASSETS_BASE + 'grass_ps1.jpg', 
   (tex) => {
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(55, 55);
+    tex.repeat.set(60, 60);
     tex.magFilter = THREE.NearestFilter;
-    tex.minFilter = THREE.NearestFilter;
-    const groundMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.85, metalness: 0.05 });
-    const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(620, 620), groundMat);
-    groundPlane.rotation.x = -Math.PI / 2;
-    groundPlane.receiveShadow = true;
-    scene.add(groundPlane);
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(600, 600),
+      new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
   },
   undefined,
   () => {
-    const groundPlane = new THREE.Mesh(
-      new THREE.PlaneGeometry(620, 620),
-      new THREE.MeshStandardMaterial({ color: 0x5a8f4c, roughness: 0.9 })
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(600, 600),
+      new THREE.MeshStandardMaterial({ color: 0x5a8f4c })
     );
-    groundPlane.rotation.x = -Math.PI / 2;
-    groundPlane.receiveShadow = true;
-    scene.add(groundPlane);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
   }
 );
 
 // ------------------------------------------------------------
-// 5. ÁRBOLES BILLBOARD
+// ÁRBOLES - tree_ps1.png (billboard)
 // ------------------------------------------------------------
 const trees = [];
 texLoader.load(ASSETS_BASE + 'tree_ps1.png',
   (tex) => {
     tex.magFilter = THREE.NearestFilter;
-    tex.minFilter = THREE.NearestFilter;
-    const leafMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.1 });
-    for (let i = 0; i < 160; i++) {
-      const scaleTree = 0.7 + Math.random() * 0.9;
-      const planeGeo = new THREE.PlaneGeometry(5.6 * scaleTree, 11.2 * scaleTree);
-      const treeMesh = new THREE.Mesh(planeGeo, leafMat);
+    const treeMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.1 });
+    for (let i = 0; i < 180; i++) {
+      const scale = 0.8 + Math.random() * 0.9;
+      const tree = new THREE.Mesh(new THREE.PlaneGeometry(5.5 * scale, 11 * scale), treeMat);
       let x, z;
-      do { x = (Math.random() - 0.5) * 290; z = (Math.random() - 0.5) * 290; }
-      while (Math.hypot(x, z) < 14);
-      treeMesh.position.set(x, 5.2 * scaleTree, z);
-      scene.add(treeMesh);
-      trees.push(treeMesh);
+      do { x = (Math.random() - 0.5) * 280; z = (Math.random() - 0.5) * 280; }
+      while (Math.hypot(x, z) < 12);
+      tree.position.set(x, 5.2 * scale, z);
+      scene.add(tree);
+      trees.push(tree);
     }
+    console.log("✅ Árboles cargados:", trees.length);
   },
   undefined,
-  () => { console.warn("tree_ps1.png no cargado"); }
+  () => { console.warn("❌ tree_ps1.png no cargado"); }
 );
 
-// Elementos decorativos
-const rockMat = new THREE.MeshStandardMaterial({ color: 0x8a8a7a, roughness: 0.8 });
-for (let i = 0; i < 200; i++) {
-  const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.12 + Math.random() * 0.15), rockMat);
-  const x = (Math.random() - 0.5) * 280;
-  const z = (Math.random() - 0.5) * 280;
-  if (Math.hypot(x, z) > 8) {
-    rock.position.set(x, 0.1, z);
-    rock.scale.set(1, Math.random() * 0.6 + 0.4, 1);
-    rock.castShadow = true;
-    rock.receiveShadow = true;
-    scene.add(rock);
-  }
+// ------------------------------------------------------------
+// DECORACIONES
+// ------------------------------------------------------------
+// Piedras
+for (let i = 0; i < 150; i++) {
+  const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.15), new THREE.MeshStandardMaterial({ color: 0x8a8a7a }));
+  rock.position.set((Math.random() - 0.5) * 280, 0.1, (Math.random() - 0.5) * 280);
+  rock.scale.set(1, Math.random() * 0.6 + 0.3, 1);
+  rock.castShadow = true;
+  if (Math.hypot(rock.position.x, rock.position.z) > 8) scene.add(rock);
 }
 
-// Partículas flotantes
-const particleCount = 800;
+// Partículas (polen/magia)
+const particleCount = 600;
 const particleGeo = new THREE.BufferGeometry();
-const particlePositions = [];
+const particlePos = [];
 for (let i = 0; i < particleCount; i++) {
-  particlePositions.push((Math.random() - 0.5) * 300);
-  particlePositions.push(Math.random() * 6);
-  particlePositions.push((Math.random() - 0.5) * 280);
+  particlePos.push((Math.random() - 0.5) * 300);
+  particlePos.push(Math.random() * 5);
+  particlePos.push((Math.random() - 0.5) * 280);
 }
-particleGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(particlePositions), 3));
-const particleMat = new THREE.PointsMaterial({ color: 0xffdd99, size: 0.05, transparent: true, opacity: 0.5 });
-const particles = new THREE.Points(particleGeo, particleMat);
+particleGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(particlePos), 3));
+const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ color: 0xffdd99, size: 0.06, transparent: true, opacity: 0.4 }));
 scene.add(particles);
 
 // ------------------------------------------------------------
-// 6. AUDIO
+// AUDIO
 // ------------------------------------------------------------
 let audioContext = null;
-let bgMusicElement = null;
+let bgMusic = null;
 let stepBuffer = null;
 let stepCooldown = false;
-const STEP_WALK_DELAY = 380;
-const STEP_RUN_DELAY = 250;
+const STEP_WALK = 380;
+const STEP_RUN = 250;
 
-function initAudioSystem() {
+function initAudio() {
   try {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     
-    bgMusicElement = new Audio(ASSETS_BASE + 'dreamcore.mp3');
-    bgMusicElement.loop = true;
-    bgMusicElement.volume = 0.5;
-    bgMusicElement.play().catch(e => console.warn("Audio autoplay bloqueado", e));
+    // Música loop
+    bgMusic = new Audio(ASSETS_BASE + 'dreamcore.mp3');
+    bgMusic.loop = true;
+    bgMusic.volume = 0.45;
+    bgMusic.play().catch(e => console.log("Autoplay bloqueado"));
     
+    // Pasos
     fetch(ASSETS_BASE + 'pasos.mp3')
       .then(res => res.arrayBuffer())
       .then(buf => audioContext.decodeAudioData(buf))
       .then(decoded => { stepBuffer = decoded; console.log("✅ pasos.mp3 cargado"); })
-      .catch(err => console.warn("pasos.mp3 no cargado", err));
-  } catch(e) { console.warn("Web Audio API no soportada", e); }
+      .catch(err => console.warn("❌ pasos.mp3:", err));
+  } catch(e) { console.warn("Web Audio error", e); }
 }
 
-function playFootstep(running) {
+function playStep(running) {
   if (!audioContext || !stepBuffer || stepCooldown) return;
-  
   stepCooldown = true;
-  setTimeout(() => { stepCooldown = false; }, running ? STEP_RUN_DELAY : STEP_WALK_DELAY);
+  setTimeout(() => { stepCooldown = false; }, running ? STEP_RUN : STEP_WALK);
   
   const source = audioContext.createBufferSource();
   source.buffer = stepBuffer;
-  const pitchVar = 0.85 + Math.random() * 0.3;
-  source.playbackRate.value = pitchVar;
-  
-  const gainNode = audioContext.createGain();
-  gainNode.gain.value = 0.6 + Math.random() * 0.2;
-  source.connect(gainNode);
-  gainNode.connect(audioContext.destination);
+  source.playbackRate.value = 0.85 + Math.random() * 0.3;
+  const gain = audioContext.createGain();
+  gain.gain.value = 0.5 + Math.random() * 0.2;
+  source.connect(gain);
+  gain.connect(audioContext.destination);
   source.start();
 }
 
 // ------------------------------------------------------------
-// 7. GAME LOOP
+// GAME LOOP
 // ------------------------------------------------------------
-const moveVec = new THREE.Vector3();
-const forwardDir = new THREE.Vector3();
-const rightDir = new THREE.Vector3();
-let bobCounter = 0;
+const moveDir = new THREE.Vector3();
+const forward = new THREE.Vector3();
+const right = new THREE.Vector3();
+let bobTime = 0;
+let vhsTime = 0;
 
-function updateMovement(deltaTime) {
+function updateMovement(dt) {
   if (!locked || !gameStarted) return;
   
-  const running = (keys['ShiftLeft'] || keys['ShiftRight']);
-  const currentSpeed = running ? 7.0 : 4.0;
-  let isMoving = false;
+  const running = keys['ShiftLeft'] || keys['ShiftRight'];
+  const speed = running ? 7.2 : 4.2;
+  let moving = false;
   
-  moveVec.set(0, 0, 0);
-  camera.getWorldDirection(forwardDir);
-  forwardDir.y = 0;
-  forwardDir.normalize();
-  rightDir.crossVectors(forwardDir, camera.up).normalize();
+  moveDir.set(0, 0, 0);
+  camera.getWorldDirection(forward);
+  forward.y = 0;
+  forward.normalize();
+  right.crossVectors(forward, camera.up).normalize();
   
-  if (keys['KeyW']) { moveVec.addScaledVector(forwardDir, 1); isMoving = true; }
-  if (keys['KeyS']) { moveVec.addScaledVector(forwardDir, -1); isMoving = true; }
-  if (keys['KeyA']) { moveVec.addScaledVector(rightDir, -1); isMoving = true; }
-  if (keys['KeyD']) { moveVec.addScaledVector(rightDir, 1); isMoving = true; }
+  if (keys['KeyW']) { moveDir.addScaledVector(forward, 1); moving = true; }
+  if (keys['KeyS']) { moveDir.addScaledVector(forward, -1); moving = true; }
+  if (keys['KeyA']) { moveDir.addScaledVector(right, -1); moving = true; }
+  if (keys['KeyD']) { moveDir.addScaledVector(right, 1); moving = true; }
   
-  if (isMoving) {
-    moveVec.normalize();
-    camera.position.addScaledVector(moveVec, currentSpeed * deltaTime);
-    playFootstep(running);
+  if (moving) {
+    moveDir.normalize();
+    camera.position.addScaledVector(moveDir, speed * dt);
+    playStep(running);
     
-    bobCounter += deltaTime * (running ? 11 : 7.5);
-    camera.position.y = 1.72 + Math.sin(bobCounter) * 0.03;
+    bobTime += dt * (running ? 11 : 7.5);
+    camera.position.y = 1.72 + Math.sin(bobTime) * 0.035;
   } else {
     camera.position.y += (1.72 - camera.position.y) * 0.12;
   }
   
-  camera.position.x = Math.min(275, Math.max(-275, camera.position.x));
-  camera.position.z = Math.min(275, Math.max(-275, camera.position.z));
+  camera.position.x = Math.min(270, Math.max(-270, camera.position.x));
+  camera.position.z = Math.min(270, Math.max(-270, camera.position.z));
 }
 
 function updateBillboards() {
   const camPos = camera.position;
-  trees.forEach(tree => {
-    if(tree) tree.lookAt(camPos.x, tree.position.y, camPos.z);
-  });
+  trees.forEach(tree => { if(tree) tree.lookAt(camPos.x, tree.position.y, camPos.z); });
 }
 
-function updateParticles(delta) {
-  particles.rotation.y += 0.005;
-}
-
-// Efecto VHS dinámico adicional (movimiento de aberración tipo Amanda)
-let vhsTime = 0;
-function updateVHSDynamic(delta) {
-  vhsTime += delta;
-  const redLayer = document.querySelector('.vhs-chromatic-red');
-  const blueLayer = document.querySelector('.vhs-chromatic-blue');
+function updateVHS(dt) {
+  vhsTime += dt;
+  const redLayer = document.getElementById('chromaRed');
+  const blueLayer = document.getElementById('chromaBlue');
   if (redLayer && blueLayer && locked) {
-    // Movimiento errático tipo cinta dañada
-    const shakeX = Math.sin(vhsTime * 45) * 2.5 + Math.cos(vhsTime * 31) * 1.2;
-    const shakeY = Math.cos(vhsTime * 38) * 1.8;
-    redLayer.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
-    blueLayer.style.transform = `translate(${-shakeX * 1.2}px, ${-shakeY * 0.7}px)`;
+    const shiftX = Math.sin(vhsTime * 40) * 3 + Math.cos(vhsTime * 28) * 1.5;
+    const shiftY = Math.cos(vhsTime * 35) * 2;
+    redLayer.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
+    blueLayer.style.transform = `translate(${-shiftX * 0.9}px, ${-shiftY * 0.6}px)`;
   }
 }
 
 // ------------------------------------------------------------
-// 8. INICIO
+// INICIO
 // ------------------------------------------------------------
 document.getElementById('startBtn').addEventListener('click', () => {
   if (gameStarted) return;
-  initAudioSystem();
+  initAudio();
   gameStarted = true;
-  const overlayDiv = document.getElementById('overlay');
-  overlayDiv.classList.add('hidden');
+  document.getElementById('overlay').classList.add('hidden');
   renderer.domElement.style.display = 'block';
-  setTimeout(() => {
-    renderer.domElement.requestPointerLock();
-  }, 200);
+  setTimeout(() => renderer.domElement.requestPointerLock(), 200);
 });
 
 renderer.domElement.addEventListener('click', () => {
@@ -613,29 +505,25 @@ renderer.domElement.addEventListener('click', () => {
 });
 
 // ------------------------------------------------------------
-// 9. BUCLE PRINCIPAL
+// ANIMACIÓN PRINCIPAL
 // ------------------------------------------------------------
 let lastTime = performance.now();
-function mainLoop() {
+function animate() {
   const now = performance.now();
-  let delta = Math.min(0.033, (now - lastTime) / 1000);
+  let dt = Math.min(0.033, (now - lastTime) / 1000);
   lastTime = now;
-  if (delta < 0.003) delta = 0.016;
-  
-  if (gameStarted && locked) {
-    updateMovement(delta);
-    updateBillboards();
-    updateParticles(delta);
-    updateVHSDynamic(delta);
-  }
   
   if (gameStarted) {
-    renderer.render(scene, camera);
+    updateMovement(dt);
+    updateBillboards();
+    updateVHS(dt);
+    particles.rotation.y += 0.003;
   }
-  requestAnimationFrame(mainLoop);
+  
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
 }
-
-mainLoop();
+animate();
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -643,7 +531,8 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-console.log("🌞 DREAMCORE - VHS estilo Amanda the Adventurer | ESC sale | Pasos con pitch");
+console.log("🌲 DREAMCORE iniciado | Assets:", ASSETS_BASE);
+console.log("📁 Archivos necesarios: dreamcore.mp3, deamcore.jpg, grass_ps1.jpg, tree_ps1.png, pasos.mp3");
 </script>
 </body>
 </html>
