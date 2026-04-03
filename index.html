@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dreamcore — El Bosque Infinito</title>
+  <title>DREAMCORE</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { overflow: hidden; background: #000; font-family: 'Courier New', monospace; }
@@ -12,73 +12,62 @@
       position: fixed; inset: 0;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      background: radial-gradient(ellipse at center, rgba(10,5,30,0.92) 0%, rgba(0,0,0,0.97) 100%);
-      z-index: 100;
-      transition: opacity 0.8s;
+      background: radial-gradient(ellipse at center, #080518 0%, #000 100%);
+      z-index: 100; transition: opacity 1s;
     }
+    #overlay.hidden { opacity: 0; pointer-events: none; }
     #overlay h1 {
-      font-size: clamp(2rem, 6vw, 4.5rem);
-      letter-spacing: 0.3em;
-      color: #c8a8f0;
-      text-shadow: 0 0 40px #9b59f6, 0 0 80px #5e2fa0;
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      letter-spacing: 0.5em; color: #c8b4ff;
+      text-shadow: 0 0 40px #9b6fff, 0 0 80px #6633cc;
+      animation: glow 3s ease-in-out infinite;
       margin-bottom: 0.4em;
-      animation: pulse 3s ease-in-out infinite;
     }
-    #overlay p {
-      color: #8a7aaa;
-      letter-spacing: 0.15em;
-      font-size: 0.9rem;
-      margin-bottom: 2.5rem;
+    #overlay .sub {
+      color: #6677aa; letter-spacing: 0.2em; font-size: 0.78rem;
+      margin-bottom: 2.5em; text-align: center; line-height: 2.2;
     }
     #startBtn {
-      padding: 0.8em 3em;
-      background: transparent;
-      border: 1px solid #9b59f6;
-      color: #c8a8f0;
-      font-family: inherit;
-      font-size: 1rem;
-      letter-spacing: 0.25em;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-transform: uppercase;
+      padding: 13px 50px; background: transparent;
+      border: 1px solid #c8b4ff44; color: #c8b4ff;
+      font-family: 'Courier New', monospace; font-size: 0.85rem;
+      letter-spacing: 0.35em; cursor: pointer; transition: all 0.4s; text-transform: uppercase;
     }
-    #startBtn:hover {
-      background: rgba(155,89,246,0.2);
-      box-shadow: 0 0 30px rgba(155,89,246,0.5);
+    #startBtn:hover { background: #c8b4ff0d; border-color: #c8b4ff; box-shadow: 0 0 30px #9b6fff33; }
+    @keyframes glow {
+      0%,100% { text-shadow: 0 0 40px #9b6fff, 0 0 80px #6633cc; }
+      50%      { text-shadow: 0 0 70px #c8b4ff, 0 0 140px #9b6fff; }
     }
-    #hud {
-      position: fixed; bottom: 1.5rem; left: 50%;
-      transform: translateX(-50%);
-      display: none; gap: 2rem;
-      color: rgba(200,168,240,0.4);
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      pointer-events: none;
-      z-index: 10;
-    }
+
     #crosshair {
       position: fixed; top: 50%; left: 50%;
       transform: translate(-50%,-50%);
-      width: 16px; height: 16px;
-      pointer-events: none;
-      z-index: 10;
-      display: none;
+      width: 14px; height: 14px;
+      pointer-events: none; z-index: 10; display: none;
     }
     #crosshair::before, #crosshair::after {
-      content: ''; position: absolute; background: rgba(255,255,255,0.45);
+      content: ''; position: absolute; background: rgba(200,180,255,0.4);
     }
-    #crosshair::before { width: 2px; height: 100%; left: 50%; transform: translateX(-50%); }
-    #crosshair::after  { width: 100%; height: 2px; top: 50%; transform: translateY(-50%); }
+    #crosshair::before { width: 1px; height: 100%; left: 50%; transform: translateX(-50%); }
+    #crosshair::after  { width: 100%; height: 1px; top: 50%; transform: translateY(-50%); }
+
+    #hint {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      color: #c8b4ff33; font-size: 0.6rem; letter-spacing: 0.2em;
+      pointer-events: none; z-index: 10; display: none;
+    }
     #paused {
       position: fixed; inset: 0; display: none;
       align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.55);
-      color: #c8a8f0; font-size: 2rem;
-      letter-spacing: 0.35em; z-index: 50;
+      background: rgba(0,0,0,0.5); z-index: 50;
+      color: #c8b4ff77; font-size: 1.3rem; letter-spacing: 0.5em;
     }
-    @keyframes pulse {
-      0%,100% { text-shadow: 0 0 40px #9b59f6, 0 0 80px #5e2fa0; }
-      50%      { text-shadow: 0 0 70px #bf7fff, 0 0 130px #9b59f6; }
+    #paused.show { display: flex; }
+
+    #vignette {
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.72) 100%);
+      pointer-events: none; z-index: 5; display: none;
     }
   </style>
 </head>
@@ -86,47 +75,60 @@
 
 <div id="overlay">
   <h1>DREAMCORE</h1>
-  <p>el bosque que no existe</p>
-  <button id="startBtn">[ entrar ]</button>
-  <p style="margin-top:2.5rem;font-size:0.68rem;opacity:0.35">WASD · mover &nbsp;|&nbsp; MOUSE · mirar &nbsp;|&nbsp; ESC · pausar</p>
+  <div class="sub">
+    el bosque que no termina<br>
+    <span style="color:#33224466;font-size:0.9em">explora · escucha · camina</span>
+  </div>
+  <button id="startBtn">[ entrar al sueño ]</button>
+  <p style="margin-top:2.5rem;font-size:0.6rem;color:#33224488;letter-spacing:0.2em">
+    WASD · mover &nbsp;|&nbsp; MOUSE · mirar &nbsp;|&nbsp; SHIFT · correr &nbsp;|&nbsp; ESC · pausar
+  </p>
 </div>
 
-<div id="paused">— PAUSADO —</div>
-<div id="hud">
-  <span>WASD mover</span><span>|</span><span>ESC pausar</span>
-</div>
 <div id="crosshair"></div>
+<div id="hint">WASD · mover &nbsp;|&nbsp; SHIFT · correr &nbsp;|&nbsp; ESC · pausar</div>
+<div id="vignette"></div>
+<div id="paused">— PAUSA —</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// ── RENDERER ────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+//  ASSETS — reemplaza REPO con tu usuario/repo de GitHub
+//  Ejemplo: https://raw.githubusercontent.com/usuario/repo/main/
+// ════════════════════════════════════════════════════════
+const ASSETS = 'https://raw.githubusercontent.com/FranciscoFuentesT/dreamcore/main/';
+
+// ── RENDERER ──────────────────────────────────────────────
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.insertBefore(renderer.domElement, document.body.firstChild);
 
-// ── SCENE ───────────────────────────────────────────────────────────────────
+// ── SCENE ─────────────────────────────────────────────────
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x06020f);
-scene.fog = new THREE.FogExp2(0x06020f, 0.022);
+scene.fog = new THREE.FogExp2(0x06021a, 0.020);
 
-// ── CAMERA ──────────────────────────────────────────────────────────────────
-const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.05, 200);
+// ── CAMERA ────────────────────────────────────────────────
+const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.05, 300);
 camera.position.set(0, 1.7, 0);
 
-// ── POINTER LOCK (manual) ───────────────────────────────────────────────────
 const canvas = renderer.domElement;
-let locked = false;
-const euler = new THREE.Euler(0, 0, 0, 'YXZ');
-const PI2 = Math.PI / 2;
+const euler  = new THREE.Euler(0, 0, 0, 'YXZ');
+const PI2    = Math.PI / 2;
+let locked   = false;
+let gameStarted = false;
 
 document.addEventListener('pointerlockchange', () => {
   locked = document.pointerLockElement === canvas;
-  document.getElementById('hud').style.display = locked ? 'flex' : 'none';
   document.getElementById('crosshair').style.display = locked ? 'block' : 'none';
-  if (gameStarted) document.getElementById('paused').style.display = locked ? 'none' : 'flex';
+  document.getElementById('hint').style.display = locked ? 'block' : 'none';
+  document.getElementById('vignette').style.display = locked ? 'block' : 'none';
+  if (gameStarted)
+    document.getElementById('paused').classList.toggle('show', !locked);
 });
+
 document.addEventListener('mousemove', e => {
   if (!locked) return;
   euler.setFromQuaternion(camera.quaternion);
@@ -135,249 +137,288 @@ document.addEventListener('mousemove', e => {
   camera.quaternion.setFromEuler(euler);
 });
 
-// ── LIGHTS ──────────────────────────────────────────────────────────────────
-scene.add(new THREE.AmbientLight(0x1a0a2e, 2.8));
+// ── KEYS ──────────────────────────────────────────────────
+const keys = {};
+document.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (e.code === 'Escape' && gameStarted)
+    locked ? document.exitPointerLock() : canvas.requestPointerLock();
+});
+document.addEventListener('keyup', e => { keys[e.code] = false; });
 
-const flashlight = new THREE.SpotLight(0xd0b0ff, 3.5, 35, Math.PI / 9, 0.45, 1.4);
+// ── LIGHTS ────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0x12082e, 2.2));
+
+const flashlight = new THREE.SpotLight(0xd4c8ff, 3, 40, Math.PI/9, 0.5, 1.5);
+flashlight.castShadow = true;
 scene.add(flashlight); scene.add(flashlight.target);
 
-const moonLight = new THREE.DirectionalLight(0x8899cc, 0.5);
-moonLight.position.set(-30, 60, -20);
-scene.add(moonLight);
+const moon = new THREE.DirectionalLight(0x8899cc, 0.4);
+moon.position.set(-30, 80, -20);
+scene.add(moon);
 
-// ── SUELO PROCEDURAL ────────────────────────────────────────────────────────
-(function() {
-  const sz = 128, cvs = document.createElement('canvas');
-  cvs.width = cvs.height = sz;
-  const ctx = cvs.getContext('2d');
-  ctx.fillStyle = '#0c1807'; ctx.fillRect(0,0,sz,sz);
-  const cols = ['#152b0b','#1a3510','#0d1a07','#1e3813','#111f08'];
-  for (let i = 0; i < 260; i++) {
-    ctx.fillStyle = cols[i % cols.length];
-    const x = Math.random()*sz, y = Math.random()*sz, r = 1+Math.random()*7;
-    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
-  }
-  const tex = new THREE.CanvasTexture(cvs);
+// Point lights atmosféricos
+[
+  [0x6633cc, 12, 15], [0x3355bb, -18, -10], [0xaa44cc, -8, 22],
+  [0x4422aa, 25, -5],  [0x993388, -20, 30],  [0x224499, 30, 20],
+].forEach(([color, x, z]) => {
+  const pl = new THREE.PointLight(color, 0.6, 20);
+  pl.position.set(x, 2, z);
+  scene.add(pl);
+});
+
+// ── TEXTURAS ──────────────────────────────────────────────
+const texLoader = new THREE.TextureLoader();
+
+// Cielo (deamcore.jpg)
+texLoader.load(ASSETS + 'deamcore.jpg', tex => {
+  scene.background = tex;
+}, undefined, () => {
+  // fallback si no carga
+  scene.background = new THREE.Color(0x06021a);
+});
+
+// Suelo (grass_ps1.jpg)
+texLoader.load(ASSETS + 'grass_ps1.jpg', tex => {
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(70, 70);
+  tex.repeat.set(60, 60);
+  tex.magFilter = THREE.NearestFilter; // PS1 pixelado
+  tex.minFilter = THREE.NearestFilter;
   const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(600,600),
+    new THREE.PlaneGeometry(600, 600),
     new THREE.MeshLambertMaterial({ map: tex })
   );
-  floor.rotation.x = -Math.PI/2;
+  floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
   scene.add(floor);
-})();
+}, undefined, () => {
+  // fallback procedural
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#0c1a08'; ctx.fillRect(0,0,128,128);
+  for (let i=0;i<300;i++) {
+    ctx.fillStyle=['#152b0b','#1a3510','#0d1a07'][i%3];
+    ctx.fillRect(Math.random()*128, Math.random()*128, 2+Math.random()*4, 2+Math.random()*4);
+  }
+  const t = new THREE.CanvasTexture(cv);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(70,70);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(600,600), new THREE.MeshLambertMaterial({map:t}));
+  floor.rotation.x = -Math.PI/2; floor.receiveShadow = true; scene.add(floor);
+});
 
-// ── ÁRBOLES BILLBOARD ───────────────────────────────────────────────────────
+// ── ÁRBOLES BILLBOARD (tree_ps1.png) ──────────────────────
+// Como Baldi's Basics: PlaneGeometry que siempre mira a la cámara (lookAt horizontal)
 const trees = [];
-(function() {
-  const W=64, H=128, cvs=document.createElement('canvas');
-  cvs.width=W; cvs.height=H;
-  const ctx=cvs.getContext('2d');
+texLoader.load(ASSETS + 'tree_ps1.png', tex => {
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestFilter;
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.1
+  });
+  for (let i = 0; i < 120; i++) {
+    const s = 0.6 + Math.random() * 0.8;
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(6*s, 12*s), mat);
+    let x, z;
+    do { x = (Math.random()-0.5)*280; z = (Math.random()-0.5)*280; }
+    while (Math.hypot(x, z) < 12);
+    mesh.position.set(x, 6*s*0.5, z);
+    scene.add(mesh);
+    trees.push(mesh);
+  }
+}, undefined, () => {
+  // Fallback: árbol procedural si no carga PNG
+  const W=64, H=128, cv=document.createElement('canvas');
+  cv.width=W; cv.height=H;
+  const ctx=cv.getContext('2d');
   ctx.clearRect(0,0,W,H);
-  // tronco
-  ctx.fillStyle='#3b2410';
-  ctx.fillRect(W/2-4, H*0.58, 8, H*0.42);
-  // copas
-  const tri=(x,y,w,h,c)=>{
-    ctx.fillStyle=c; ctx.beginPath();
-    ctx.moveTo(x,y); ctx.lineTo(x-w/2,y+h); ctx.lineTo(x+w/2,y+h);
-    ctx.closePath(); ctx.fill();
-  };
-  tri(W/2,0,       W*0.98, H*0.36, '#183d0f');
-  tri(W/2, H*0.22, W*0.82, H*0.30, '#1e4a14');
-  tri(W/2, H*0.40, W*0.66, H*0.26, '#255c1a');
-  // brillo
-  ctx.fillStyle='rgba(180,255,150,0.12)';
-  for(let i=0;i<40;i++){
-    ctx.fillRect(Math.floor(Math.random()*W), Math.floor(Math.random()*H*0.65), 2, 2);
+  ctx.fillStyle='#3b2410'; ctx.fillRect(W/2-4,H*0.58,8,H*0.42);
+  [[W/2,0,W*0.96,H*0.36,'#183d0f'],[W/2,H*0.22,W*0.8,H*0.30,'#1e4a14'],[W/2,H*0.40,W*0.64,H*0.26,'#255c1a']].forEach(([x,y,w,h,c])=>{
+    ctx.fillStyle=c; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-w/2,y+h); ctx.lineTo(x+w/2,y+h); ctx.closePath(); ctx.fill();
+  });
+  const t=new THREE.CanvasTexture(cv);
+  const mat=new THREE.MeshBasicMaterial({map:t,transparent:true,side:THREE.DoubleSide,alphaTest:0.08});
+  for(let i=0;i<100;i++){
+    const s=0.7+Math.random()*0.9;
+    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(5*s,10*s),mat);
+    let x,z; do{x=(Math.random()-0.5)*280;z=(Math.random()-0.5)*280;}while(Math.hypot(x,z)<12);
+    mesh.position.set(x,5*s*0.5,z); scene.add(mesh); trees.push(mesh);
   }
-  const tex = new THREE.CanvasTexture(cvs);
-  const mat = new THREE.MeshBasicMaterial({ map:tex, transparent:true, side:THREE.DoubleSide, alphaTest:0.08 });
+});
 
-  for(let i=0;i<90;i++){
-    const s = 0.7+Math.random()*0.9;
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(5*s,10*s), mat);
-    let x,z;
-    do { x=(Math.random()-0.5)*280; z=(Math.random()-0.5)*280; }
-    while(Math.hypot(x,z)<10);
-    mesh.position.set(x, 5*s*0.5, z);
-    scene.add(mesh); trees.push(mesh);
-  }
-})();
-
-// ── PILARES / RUINAS ────────────────────────────────────────────────────────
+// ── PILARES / RUINAS ──────────────────────────────────────
 (function() {
-  const mat = new THREE.MeshLambertMaterial({ color: 0x221530 });
-  for(let i=0;i<20;i++){
-    const h=3+Math.random()*9, r=0.35+Math.random()*0.4;
-    const pillar = new THREE.Mesh(new THREE.CylinderGeometry(r,r*1.15,h,6), mat);
-    const x=(Math.random()-0.5)*220, z=(Math.random()-0.5)*220;
-    pillar.position.set(x,h/2,z); pillar.castShadow=true; scene.add(pillar);
-    const cap = new THREE.Mesh(new THREE.BoxGeometry(r*3,0.3,r*3), mat);
+  const mat = new THREE.MeshLambertMaterial({ color: 0x1a0e30 });
+  for (let i=0; i<18; i++) {
+    const h=3+Math.random()*8, r=0.3+Math.random()*0.35;
+    const p=new THREE.Mesh(new THREE.CylinderGeometry(r,r*1.1,h,6),mat);
+    const x=(Math.random()-0.5)*200, z=(Math.random()-0.5)*200;
+    p.position.set(x,h/2,z); p.castShadow=true; scene.add(p);
+    const cap=new THREE.Mesh(new THREE.BoxGeometry(r*3,0.25,r*3),mat);
     cap.position.set(x,h,z); scene.add(cap);
   }
 })();
 
-// ── ORBES FLOTANTES ─────────────────────────────────────────────────────────
+// ── ORBES DECORATIVOS ─────────────────────────────────────
 const orbs = [];
 (function() {
-  const palette=[0xc8a8ff,0xff88cc,0x88ccff,0xffddaa,0xaaffee,0xffaa88];
-  for(let i=0;i<14;i++){
+  const palette=[0xc8a8ff,0xff88cc,0x88ccff,0xffddaa,0xaaffee];
+  for(let i=0;i<10;i++){
     const col=palette[i%palette.length];
-    const mesh=new THREE.Mesh(
-      new THREE.SphereGeometry(0.15+Math.random()*0.18,8,8),
-      new THREE.MeshBasicMaterial({color:col})
-    );
-    mesh.position.set((Math.random()-0.5)*130, 1.2+Math.random()*4, (Math.random()-0.5)*130);
-    const light=new THREE.PointLight(col,1.4,9);
-    mesh.add(light);
-    mesh.userData.offset=Math.random()*Math.PI*2;
-    mesh.userData.baseY=mesh.position.y;
-    scene.add(mesh); orbs.push(mesh);
+    const m=new THREE.Mesh(new THREE.SphereGeometry(0.14+Math.random()*0.14,8,8), new THREE.MeshBasicMaterial({color:col}));
+    m.position.set((Math.random()-0.5)*120, 1+Math.random()*3.5, (Math.random()-0.5)*120);
+    const l=new THREE.PointLight(col,1.2,8); m.add(l);
+    m.userData.offset=Math.random()*Math.PI*2;
+    m.userData.baseY=m.position.y;
+    scene.add(m); orbs.push(m);
   }
 })();
 
-// ── NIEBLA DE SUELO ─────────────────────────────────────────────────────────
+// ── ESTRELLAS ─────────────────────────────────────────────
 (function() {
-  const mat=new THREE.MeshBasicMaterial({color:0x3a1a6a,transparent:true,opacity:0.06,side:THREE.DoubleSide,depthWrite:false});
-  for(let i=0;i<35;i++){
-    const r=6+Math.random()*18;
-    const m=new THREE.Mesh(new THREE.CircleGeometry(r,10), mat.clone());
-    m.rotation.x=-Math.PI/2;
-    m.position.set((Math.random()-0.5)*260,0.04,(Math.random()-0.5)*260);
-    scene.add(m);
-  }
-})();
-
-// ── ESTRELLAS ────────────────────────────────────────────────────────────────
-(function() {
-  const N=2500, pos=new Float32Array(N*3);
+  const N=2200, pos=new Float32Array(N*3);
   for(let i=0;i<N;i++){
-    const th=Math.random()*Math.PI*2, ph=Math.acos(Math.random()*2-1), r=140+Math.random()*40;
+    const th=Math.random()*Math.PI*2, ph=Math.acos(Math.random()*2-1), r=150+Math.random()*50;
     pos[i*3]=r*Math.sin(ph)*Math.cos(th);
-    pos[i*3+1]=Math.abs(r*Math.cos(ph))+4;
+    pos[i*3+1]=Math.abs(r*Math.cos(ph))+5;
     pos[i*3+2]=r*Math.sin(ph)*Math.sin(th);
   }
   const geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
-  scene.add(new THREE.Points(geo,new THREE.PointsMaterial({color:0xffffff,size:0.22,sizeAttenuation:true})));
+  scene.add(new THREE.Points(geo,new THREE.PointsMaterial({color:0xffffff,size:0.18,sizeAttenuation:true})));
 })();
 
-// ── LUNA ────────────────────────────────────────────────────────────────────
-(function() {
-  const moon=new THREE.Mesh(new THREE.SphereGeometry(4,16,16),new THREE.MeshBasicMaterial({color:0xeee0ff}));
-  moon.position.set(-60,85,-110); scene.add(moon);
-  const halo=new THREE.Mesh(new THREE.SphereGeometry(5.8,16,16),new THREE.MeshBasicMaterial({color:0xc8a0ff,transparent:true,opacity:0.07,side:THREE.BackSide}));
-  moon.add(halo);
-})();
+// ── AUDIO ─────────────────────────────────────────────────
+let bgMusic   = null;    // HTMLAudioElement
+let stepAudio = null;    // AudioBuffer para Web Audio
+let actx      = null;
+let stepCooldown = false;
+// Intervalo entre pasos: ~380ms caminando, ~260ms corriendo
+const STEP_WALK = 380;
+const STEP_RUN  = 255;
 
-// ── INPUT ───────────────────────────────────────────────────────────────────
-const keys = {};
-document.addEventListener('keydown', e => {
-  keys[e.code] = true;
-  if(e.code==='Escape' && gameStarted){
-    locked ? document.exitPointerLock() : canvas.requestPointerLock();
+function initAudio() {
+  actx = new (window.AudioContext || window.webkitAudioContext)();
+
+  // Música de fondo via HTMLAudio (loop, sin pitch)
+  bgMusic = new Audio(ASSETS + 'dreamcore.mp3');
+  bgMusic.loop   = true;
+  bgMusic.volume = 0.45;
+  bgMusic.play().catch(() => {}); // autoplay guarded
+
+  // Cargar buffer de pasos para pitch variable
+  fetch(ASSETS + 'pasos.mp3')
+    .then(r => r.arrayBuffer())
+    .then(ab => actx.decodeAudioData(ab))
+    .then(buf => { stepAudio = buf; })
+    .catch(() => { stepAudio = null; });
+}
+
+function playStep(running) {
+  if (!actx || stepCooldown) return;
+
+  stepCooldown = true;
+  setTimeout(() => { stepCooldown = false; }, running ? STEP_RUN : STEP_WALK);
+
+  if (stepAudio) {
+    // Pitch realista: variación ±8% → suena natural, ni chipmunk ni toro
+    // 0.92 – 1.08 cubre el rango de peso/superficie sin exagerar
+    const pitchVariance = 0.92 + Math.random() * 0.16;
+
+    const source = actx.createBufferSource();
+    source.buffer = stepAudio;
+    source.playbackRate.value = pitchVariance;
+
+    const gain = actx.createGain();
+    // Volumen ligeramente aleatorio también (±10%) para realismo
+    gain.gain.value = 0.7 + Math.random() * 0.2;
+
+    source.connect(gain);
+    gain.connect(actx.destination);
+    source.start();
   }
-});
-document.addEventListener('keyup', e => { keys[e.code]=false; });
-
-// ── AUDIO (Web Audio API) ────────────────────────────────────────────────────
-let actx=null, stepTimer=null;
-
-function initAudio(){
-  actx=new(window.AudioContext||window.webkitAudioContext)();
-  const master=actx.createGain(); master.gain.value=0.15; master.connect(actx.destination);
-
-  const drone=(freq,type,vol,det=0)=>{
-    const o=actx.createOscillator(), g=actx.createGain();
-    o.type=type; o.frequency.value=freq; if(det) o.detune.value=det;
-    g.gain.value=vol; o.connect(g); g.connect(master); o.start();
-    const lfo=actx.createOscillator(), lg=actx.createGain();
-    lfo.frequency.value=0.04+Math.random()*0.07; lg.gain.value=0.04;
-    lfo.connect(lg); lg.connect(g.gain); lfo.start();
-  };
-  drone(55,'sine',0.6); drone(55.4,'sine',0.28,10);
-  drone(110,'sine',0.2); drone(165,'triangle',0.1);
-  drone(220,'sine',0.07); drone(27.5,'sine',0.38);
-
-  // ruido filtrado
-  const buf=actx.createBuffer(1,actx.sampleRate*4,actx.sampleRate);
-  const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.012;
-  const ns=actx.createBufferSource(); ns.buffer=buf; ns.loop=true;
-  const flt=actx.createBiquadFilter(); flt.type='lowpass'; flt.frequency.value=350;
-  ns.connect(flt); flt.connect(master); ns.start();
 }
 
-function playStep(){
-  if(!actx||stepTimer) return;
-  const o=actx.createOscillator(), g=actx.createGain();
-  o.type='sine';
-  o.frequency.setValueAtTime(75+Math.random()*20,actx.currentTime);
-  o.frequency.exponentialRampToValueAtTime(28,actx.currentTime+0.13);
-  g.gain.setValueAtTime(0.22,actx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+0.2);
-  o.connect(g); g.connect(actx.destination);
-  o.start(); o.stop(actx.currentTime+0.22);
-  stepTimer=setTimeout(()=>{ stepTimer=null; },330);
-}
+// ── GAME LOOP ─────────────────────────────────────────────
+const moveDir  = new THREE.Vector3();
+const camDir   = new THREE.Vector3();
+const camRight = new THREE.Vector3();
+const clock    = new THREE.Clock();
+let bobTime    = 0;
 
-// ── GAME LOOP ───────────────────────────────────────────────────────────────
-let gameStarted=false;
-const moveDir=new THREE.Vector3(), camDir=new THREE.Vector3(), camRight=new THREE.Vector3();
-const clock=new THREE.Clock();
-
-document.getElementById('startBtn').addEventListener('click',()=>{
+document.getElementById('startBtn').addEventListener('click', () => {
   initAudio();
-  gameStarted=true;
-  const ov=document.getElementById('overlay');
-  ov.style.opacity='0';
-  setTimeout(()=>ov.style.display='none',800);
+  gameStarted = true;
+  const ov = document.getElementById('overlay');
+  ov.classList.add('hidden');
   canvas.requestPointerLock();
 });
-canvas.addEventListener('click',()=>{ if(gameStarted&&!locked) canvas.requestPointerLock(); });
+canvas.addEventListener('click', () => {
+  if (gameStarted && !locked) canvas.requestPointerLock();
+});
 
-function animate(){
+function animate() {
   requestAnimationFrame(animate);
-  const dt=Math.min(clock.getDelta(),0.05);
-  const t=clock.elapsedTime;
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t  = clock.elapsedTime;
 
-  if(locked&&gameStarted){
-    let moving=false; moveDir.set(0,0,0);
-    camera.getWorldDirection(camDir); camDir.y=0; camDir.normalize();
-    camRight.crossVectors(camDir,camera.up).normalize();
-    if(keys['KeyW']){ moveDir.addScaledVector(camDir,1);  moving=true; }
-    if(keys['KeyS']){ moveDir.addScaledVector(camDir,-1); moving=true; }
-    if(keys['KeyA']){ moveDir.addScaledVector(camRight,-1); moving=true; }
-    if(keys['KeyD']){ moveDir.addScaledVector(camRight,1);  moving=true; }
-    if(moving){ moveDir.normalize(); camera.position.addScaledVector(moveDir,5.5*dt); playStep(); }
-    camera.position.y=1.7;
+  if (locked && gameStarted) {
+    const running = keys['ShiftLeft'] || keys['ShiftRight'];
+    const speed   = running ? 7.5 : 4.0;
+    let moving    = false;
+
+    moveDir.set(0, 0, 0);
+    camera.getWorldDirection(camDir); camDir.y = 0; camDir.normalize();
+    camRight.crossVectors(camDir, camera.up).normalize();
+
+    if (keys['KeyW']) { moveDir.addScaledVector(camDir,    1); moving = true; }
+    if (keys['KeyS']) { moveDir.addScaledVector(camDir,   -1); moving = true; }
+    if (keys['KeyA']) { moveDir.addScaledVector(camRight, -1); moving = true; }
+    if (keys['KeyD']) { moveDir.addScaledVector(camRight,  1); moving = true; }
+
+    if (moving) {
+      moveDir.normalize();
+      camera.position.addScaledVector(moveDir, speed * dt);
+      playStep(running);
+
+      // Headbob
+      bobTime += dt * (running ? 10 : 6.5);
+      camera.position.y = 1.7 + Math.sin(bobTime) * 0.038;
+    } else {
+      // Suave retorno a altura neutral
+      camera.position.y += (1.7 - camera.position.y) * 0.15;
+    }
+
+    // Límite mundo
+    camera.position.x = Math.max(-250, Math.min(250, camera.position.x));
+    camera.position.z = Math.max(-250, Math.min(250, camera.position.z));
   }
 
   // Linterna
   flashlight.position.copy(camera.position);
-  const fd=new THREE.Vector3(); camera.getWorldDirection(fd);
-  flashlight.target.position.copy(camera.position).addScaledVector(fd,5);
+  const fd = new THREE.Vector3();
+  camera.getWorldDirection(fd);
+  flashlight.target.position.copy(camera.position).addScaledVector(fd, 6);
   flashlight.target.updateMatrixWorld();
 
-  // Billboards
-  trees.forEach(tr=>tr.lookAt(camera.position.x,tr.position.y,camera.position.z));
-
-  // Orbes
-  orbs.forEach(o=>{
-    o.position.y=o.userData.baseY+Math.sin(t*0.75+o.userData.offset)*0.55;
-    o.rotation.y+=dt*0.35;
+  // Árboles billboard — solo rotan en Y (como Baldi's Basics)
+  trees.forEach(tr => {
+    tr.lookAt(camera.position.x, tr.position.y, camera.position.z);
   });
 
-  renderer.render(scene,camera);
+  // Orbes flotantes
+  orbs.forEach(o => {
+    o.position.y = o.userData.baseY + Math.sin(t * 0.8 + o.userData.offset) * 0.5;
+    o.rotation.y += dt * 0.4;
+  });
+
+  renderer.render(scene, camera);
 }
 animate();
 
-window.addEventListener('resize',()=>{
-  camera.aspect=innerWidth/innerHeight;
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight);
+  renderer.setSize(innerWidth, innerHeight);
 });
 </script>
 </body>
