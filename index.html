@@ -2,72 +2,102 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>DREAMCORE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>DREAMCORE - Bosque Onírico</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
     body { overflow: hidden; background: #000; font-family: 'Courier New', monospace; }
-    canvas { display: block; }
+    canvas { display: block; position: fixed; top: 0; left: 0; }
 
+    /* Overlay de inicio */
     #overlay {
       position: fixed; inset: 0;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       background: radial-gradient(ellipse at center, #080518 0%, #000 100%);
-      z-index: 100; transition: opacity 1s;
+      z-index: 200; transition: opacity 1.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      backdrop-filter: blur(2px);
     }
     #overlay.hidden { opacity: 0; pointer-events: none; }
     #overlay h1 {
       font-size: clamp(2.5rem, 8vw, 5rem);
       letter-spacing: 0.5em; color: #c8b4ff;
-      text-shadow: 0 0 40px #9b6fff, 0 0 80px #6633cc;
+      text-shadow: 0 0 40px #9b6fff, 0 0 80px #6633cc, 0 0 120px #4400aa;
       animation: glow 3s ease-in-out infinite;
       margin-bottom: 0.4em;
+      font-weight: 300;
+    }
+    @keyframes glow {
+      0%,100% { text-shadow: 0 0 40px #9b6fff, 0 0 80px #6633cc; opacity: 0.9; }
+      50%      { text-shadow: 0 0 70px #c8b4ff, 0 0 140px #9b6fff, 0 0 200px #aa88ff; opacity: 1; }
     }
     #overlay .sub {
-      color: #6677aa; letter-spacing: 0.2em; font-size: 0.78rem;
+      color: #8899cc; letter-spacing: 0.2em; font-size: 0.78rem;
       margin-bottom: 2.5em; text-align: center; line-height: 2.2;
+      text-transform: uppercase;
     }
     #startBtn {
       padding: 13px 50px; background: transparent;
-      border: 1px solid #c8b4ff44; color: #c8b4ff;
+      border: 1.5px solid #c8b4ff66; color: #c8b4ff;
       font-family: 'Courier New', monospace; font-size: 0.85rem;
       letter-spacing: 0.35em; cursor: pointer; transition: all 0.4s; text-transform: uppercase;
+      backdrop-filter: blur(5px);
     }
-    #startBtn:hover { background: #c8b4ff0d; border-color: #c8b4ff; box-shadow: 0 0 30px #9b6fff33; }
-    @keyframes glow {
-      0%,100% { text-shadow: 0 0 40px #9b6fff, 0 0 80px #6633cc; }
-      50%      { text-shadow: 0 0 70px #c8b4ff, 0 0 140px #9b6fff; }
-    }
+    #startBtn:hover { background: #c8b4ff1a; border-color: #c8b4ff; box-shadow: 0 0 30px #9b6fff55; letter-spacing: 0.45em; }
 
+    /* UI elementos */
     #crosshair {
       position: fixed; top: 50%; left: 50%;
       transform: translate(-50%,-50%);
-      width: 14px; height: 14px;
-      pointer-events: none; z-index: 10; display: none;
+      width: 18px; height: 18px;
+      pointer-events: none; z-index: 100; display: none;
     }
     #crosshair::before, #crosshair::after {
-      content: ''; position: absolute; background: rgba(200,180,255,0.4);
+      content: ''; position: absolute; background: rgba(210, 180, 255, 0.7);
+      box-shadow: 0 0 4px #aa88ff;
     }
-    #crosshair::before { width: 1px; height: 100%; left: 50%; transform: translateX(-50%); }
-    #crosshair::after  { width: 100%; height: 1px; top: 50%; transform: translateY(-50%); }
+    #crosshair::before { width: 1.5px; height: 100%; left: 50%; transform: translateX(-50%); }
+    #crosshair::after  { width: 100%; height: 1.5px; top: 50%; transform: translateY(-50%); }
+    #crosshair .dot {
+      position: absolute; top: 50%; left: 50%; width: 3px; height: 3px;
+      background: #d4bcff; border-radius: 50%; transform: translate(-50%, -50%);
+    }
 
     #hint {
       position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      color: #c8b4ff33; font-size: 0.6rem; letter-spacing: 0.2em;
-      pointer-events: none; z-index: 10; display: none;
+      color: #c8b4ff66; font-size: 0.6rem; letter-spacing: 0.2em;
+      pointer-events: none; z-index: 100; display: none;
+      background: rgba(0,0,0,0.4); padding: 6px 14px; border-radius: 40px;
+      backdrop-filter: blur(4px);
+      white-space: nowrap;
     }
     #paused {
       position: fixed; inset: 0; display: none;
       align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.5); z-index: 50;
-      color: #c8b4ff77; font-size: 1.3rem; letter-spacing: 0.5em;
+      background: rgba(0,0,0,0.7); z-index: 150;
+      color: #c8b4ffaa; font-size: 1.3rem; letter-spacing: 0.5em;
+      backdrop-filter: blur(8px);
     }
     #paused.show { display: flex; }
 
+    /* Vignette + scanlines (efecto VHS) */
     #vignette {
       position: fixed; inset: 0;
-      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.72) 100%);
-      pointer-events: none; z-index: 5; display: none;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.75) 100%);
+      pointer-events: none; z-index: 90; display: none;
+      mix-blend-mode: multiply;
+    }
+    .vhs-overlay {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 95;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 2px, transparent 2px, transparent 6px);
+      opacity: 0.5;
+    }
+    .vhs-chromatic {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 92;
+      mix-blend-mode: screen;
+      background: radial-gradient(circle at 30% 40%, rgba(255,0,0,0.08), transparent 60%);
     }
   </style>
 </head>
@@ -76,350 +106,456 @@
 <div id="overlay">
   <h1>DREAMCORE</h1>
   <div class="sub">
-    el bosque que no termina<br>
-    <span style="color:#33224466;font-size:0.9em">explora · escucha · camina</span>
+    ◆ el bosque que no termina ◆<br>
+    <span style="color:#554488aa;font-size:0.9em">✦ explora · escucha · camina ✦</span>
   </div>
   <button id="startBtn">[ entrar al sueño ]</button>
-  <p style="margin-top:2.5rem;font-size:0.6rem;color:#33224488;letter-spacing:0.2em">
-    WASD · mover &nbsp;|&nbsp; MOUSE · mirar &nbsp;|&nbsp; SHIFT · correr &nbsp;|&nbsp; ESC · pausar
+  <p style="margin-top:2.5rem;font-size:0.6rem;color:#443366aa;letter-spacing:0.2em">
+    🎮 WASD · mover &nbsp;|&nbsp; 🖱️ MOUSE · mirar &nbsp;|&nbsp; ⚡ SHIFT · correr &nbsp;|&nbsp; ⎋ ESC · pausar
   </p>
 </div>
 
-<div id="crosshair"></div>
-<div id="hint">WASD · mover &nbsp;|&nbsp; SHIFT · correr &nbsp;|&nbsp; ESC · pausar</div>
+<div id="crosshair"><div class="dot"></div></div>
+<div id="hint">WASD · mover | SHIFT · correr | ESC · pausar</div>
 <div id="vignette"></div>
+<div class="vhs-overlay"></div>
+<div class="vhs-chromatic"></div>
 <div id="paused">— PAUSA —</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// ════════════════════════════════════════════════════════
-//  ASSETS — reemplaza REPO con tu usuario/repo de GitHub
-//  Ejemplo: https://raw.githubusercontent.com/usuario/repo/main/
-// ════════════════════════════════════════════════════════
-const ASSETS = 'https://raw.githubusercontent.com/FranciscoFuentesT/dreamcore/main/';
+// ============================================================
+// CONFIGURACIÓN DE ASSETS (GitHub Pages RAW)
+// CAMBIA 'FranciscoFuentesT/dreamcore' por tu usuario/repo
+// ============================================================
+const ASSETS_BASE = 'https://raw.githubusercontent.com/FranciscoFuentesT/dreamcore/main/';
 
-// ── RENDERER ──────────────────────────────────────────────
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+// Archivos necesarios:
+// - dreamcore.mp3   (música ambiente loop)
+// - deamcore.jpg    (textura de cielo / background)
+// - grass_ps1.jpg   (textura suelo estilo PS1)
+// - tree_ps1.png    (sprite árbol billboard)
+// - pasos.mp3       (sample de pasos)
+
+// ------------------------------------------------------------
+// 1. RENDERER
+// ------------------------------------------------------------
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setSize(innerWidth, innerHeight);
+renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-document.body.insertBefore(renderer.domElement, document.body.firstChild);
+document.body.appendChild(renderer.domElement);
 
-// ── SCENE ─────────────────────────────────────────────────
+// ------------------------------------------------------------
+// 2. ESCENA Y CÁMARA
+// ------------------------------------------------------------
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x06021a, 0.020);
+scene.fog = new THREE.FogExp2(0x040218, 0.022); // niebla densa onírica
 
-// ── CAMERA ────────────────────────────────────────────────
-const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.05, 300);
-camera.position.set(0, 1.7, 0);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.08, 320);
+camera.position.set(0, 1.75, 0);
 
-const canvas = renderer.domElement;
-const euler  = new THREE.Euler(0, 0, 0, 'YXZ');
-const PI2    = Math.PI / 2;
-let locked   = false;
+// Controles
+const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+const PI2 = Math.PI / 2;
+let locked = false;
 let gameStarted = false;
 
+// Pointer lock
 document.addEventListener('pointerlockchange', () => {
-  locked = document.pointerLockElement === canvas;
+  locked = document.pointerLockElement === renderer.domElement;
   document.getElementById('crosshair').style.display = locked ? 'block' : 'none';
   document.getElementById('hint').style.display = locked ? 'block' : 'none';
   document.getElementById('vignette').style.display = locked ? 'block' : 'none';
-  if (gameStarted)
-    document.getElementById('paused').classList.toggle('show', !locked);
+  if (gameStarted) document.getElementById('paused').classList.toggle('show', !locked);
 });
 
-document.addEventListener('mousemove', e => {
+document.addEventListener('mousemove', (e) => {
   if (!locked) return;
   euler.setFromQuaternion(camera.quaternion);
-  euler.y -= e.movementX * 0.002;
-  euler.x  = Math.max(-PI2, Math.min(PI2, euler.x - e.movementY * 0.002));
+  euler.y -= e.movementX * 0.0022;
+  euler.x = Math.max(-PI2, Math.min(PI2, euler.x - e.movementY * 0.0022));
   camera.quaternion.setFromEuler(euler);
 });
 
-// ── KEYS ──────────────────────────────────────────────────
+// Teclado
 const keys = {};
-document.addEventListener('keydown', e => {
+document.addEventListener('keydown', (e) => {
   keys[e.code] = true;
-  if (e.code === 'Escape' && gameStarted)
-    locked ? document.exitPointerLock() : canvas.requestPointerLock();
+  if (e.code === 'Escape' && gameStarted) {
+    if (locked) document.exitPointerLock();
+    else renderer.domElement.requestPointerLock();
+  }
 });
-document.addEventListener('keyup', e => { keys[e.code] = false; });
+document.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
-// ── LIGHTS ────────────────────────────────────────────────
-scene.add(new THREE.AmbientLight(0x12082e, 2.2));
+// ------------------------------------------------------------
+// 3. LUCES (atmósfera psicodélica / crepuscular)
+// ------------------------------------------------------------
+scene.add(new THREE.AmbientLight(0x180c3a, 2.4));
 
-const flashlight = new THREE.SpotLight(0xd4c8ff, 3, 40, Math.PI/9, 0.5, 1.5);
+// Linterna (focus)
+const flashlight = new THREE.SpotLight(0xe0ccff, 3.8, 44, Math.PI / 8, 0.6, 1.6);
 flashlight.castShadow = true;
-scene.add(flashlight); scene.add(flashlight.target);
+flashlight.shadow.mapSize.width = 1024;
+flashlight.shadow.mapSize.height = 1024;
+scene.add(flashlight);
+scene.add(flashlight.target);
 
-const moon = new THREE.DirectionalLight(0x8899cc, 0.4);
-moon.position.set(-30, 80, -20);
-scene.add(moon);
+// Luz lunar / bruma
+const moonLight = new THREE.DirectionalLight(0x99aaff, 0.55);
+moonLight.position.set(-25, 70, -15);
+scene.add(moonLight);
 
-// Point lights atmosféricos
-[
-  [0x6633cc, 12, 15], [0x3355bb, -18, -10], [0xaa44cc, -8, 22],
-  [0x4422aa, 25, -5],  [0x993388, -20, 30],  [0x224499, 30, 20],
-].forEach(([color, x, z]) => {
-  const pl = new THREE.PointLight(color, 0.6, 20);
-  pl.position.set(x, 2, z);
+// Luces de hadas flotantes
+const fairyLights = [];
+[ [0xaa66ff, 12, 18], [0x66aaff, -22, -12], [0xff66cc, -15, 26], 
+  [0x88ffaa, 30, -8],  [0xffaa66, -28, -22], [0xcc88ff, 28, 24],
+  [0x66ffff, 5, -35],  [0xff88aa, -35, 5] ].forEach(([color, x, z]) => {
+  const pl = new THREE.PointLight(color, 0.9, 28);
+  pl.position.set(x, 1.5 + Math.random() * 3, z);
   scene.add(pl);
+  fairyLights.push(pl);
 });
 
-// ── TEXTURAS ──────────────────────────────────────────────
+// ------------------------------------------------------------
+// 4. TEXTURAS CON FALLBACKS (para que nunca falle)
+// ------------------------------------------------------------
 const texLoader = new THREE.TextureLoader();
 
-// Cielo (deamcore.jpg)
-texLoader.load(ASSETS + 'deamcore.jpg', tex => {
-  scene.background = tex;
-}, undefined, () => {
-  // fallback si no carga
-  scene.background = new THREE.Color(0x06021a);
-});
+// CIELO (deamcore.jpg)
+texLoader.load(ASSETS_BASE + 'deamcore.jpg', 
+  (tex) => { scene.background = tex; tex.mapping = THREE.EquirectangularMapping; },
+  undefined,
+  () => { console.warn("No se pudo cargar deamcore.jpg, usando cielo nocturno degradado"); scene.background = new THREE.Color(0x030018); }
+);
 
-// Suelo (grass_ps1.jpg)
-texLoader.load(ASSETS + 'grass_ps1.jpg', tex => {
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(60, 60);
-  tex.magFilter = THREE.NearestFilter; // PS1 pixelado
-  tex.minFilter = THREE.NearestFilter;
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(600, 600),
-    new THREE.MeshLambertMaterial({ map: tex })
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  scene.add(floor);
-}, undefined, () => {
-  // fallback procedural
-  const cv = document.createElement('canvas'); cv.width = cv.height = 128;
-  const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#0c1a08'; ctx.fillRect(0,0,128,128);
-  for (let i=0;i<300;i++) {
-    ctx.fillStyle=['#152b0b','#1a3510','#0d1a07'][i%3];
-    ctx.fillRect(Math.random()*128, Math.random()*128, 2+Math.random()*4, 2+Math.random()*4);
-  }
-  const t = new THREE.CanvasTexture(cv);
-  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(70,70);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(600,600), new THREE.MeshLambertMaterial({map:t}));
-  floor.rotation.x = -Math.PI/2; floor.receiveShadow = true; scene.add(floor);
-});
-
-// ── ÁRBOLES BILLBOARD (tree_ps1.png) ──────────────────────
-// Como Baldi's Basics: PlaneGeometry que siempre mira a la cámara (lookAt horizontal)
-const trees = [];
-texLoader.load(ASSETS + 'tree_ps1.png', tex => {
-  tex.magFilter = THREE.NearestFilter;
-  tex.minFilter = THREE.NearestFilter;
-  const mat = new THREE.MeshBasicMaterial({
-    map: tex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.1
-  });
-  for (let i = 0; i < 120; i++) {
-    const s = 0.6 + Math.random() * 0.8;
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(6*s, 12*s), mat);
-    let x, z;
-    do { x = (Math.random()-0.5)*280; z = (Math.random()-0.5)*280; }
-    while (Math.hypot(x, z) < 12);
-    mesh.position.set(x, 6*s*0.5, z);
-    scene.add(mesh);
-    trees.push(mesh);
-  }
-}, undefined, () => {
-  // Fallback: árbol procedural si no carga PNG
-  const W=64, H=128, cv=document.createElement('canvas');
-  cv.width=W; cv.height=H;
-  const ctx=cv.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#3b2410'; ctx.fillRect(W/2-4,H*0.58,8,H*0.42);
-  [[W/2,0,W*0.96,H*0.36,'#183d0f'],[W/2,H*0.22,W*0.8,H*0.30,'#1e4a14'],[W/2,H*0.40,W*0.64,H*0.26,'#255c1a']].forEach(([x,y,w,h,c])=>{
-    ctx.fillStyle=c; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-w/2,y+h); ctx.lineTo(x+w/2,y+h); ctx.closePath(); ctx.fill();
-  });
-  const t=new THREE.CanvasTexture(cv);
-  const mat=new THREE.MeshBasicMaterial({map:t,transparent:true,side:THREE.DoubleSide,alphaTest:0.08});
-  for(let i=0;i<100;i++){
-    const s=0.7+Math.random()*0.9;
-    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(5*s,10*s),mat);
-    let x,z; do{x=(Math.random()-0.5)*280;z=(Math.random()-0.5)*280;}while(Math.hypot(x,z)<12);
-    mesh.position.set(x,5*s*0.5,z); scene.add(mesh); trees.push(mesh);
-  }
-});
-
-// ── PILARES / RUINAS ──────────────────────────────────────
-(function() {
-  const mat = new THREE.MeshLambertMaterial({ color: 0x1a0e30 });
-  for (let i=0; i<18; i++) {
-    const h=3+Math.random()*8, r=0.3+Math.random()*0.35;
-    const p=new THREE.Mesh(new THREE.CylinderGeometry(r,r*1.1,h,6),mat);
-    const x=(Math.random()-0.5)*200, z=(Math.random()-0.5)*200;
-    p.position.set(x,h/2,z); p.castShadow=true; scene.add(p);
-    const cap=new THREE.Mesh(new THREE.BoxGeometry(r*3,0.25,r*3),mat);
-    cap.position.set(x,h,z); scene.add(cap);
-  }
-})();
-
-// ── ORBES DECORATIVOS ─────────────────────────────────────
-const orbs = [];
-(function() {
-  const palette=[0xc8a8ff,0xff88cc,0x88ccff,0xffddaa,0xaaffee];
-  for(let i=0;i<10;i++){
-    const col=palette[i%palette.length];
-    const m=new THREE.Mesh(new THREE.SphereGeometry(0.14+Math.random()*0.14,8,8), new THREE.MeshBasicMaterial({color:col}));
-    m.position.set((Math.random()-0.5)*120, 1+Math.random()*3.5, (Math.random()-0.5)*120);
-    const l=new THREE.PointLight(col,1.2,8); m.add(l);
-    m.userData.offset=Math.random()*Math.PI*2;
-    m.userData.baseY=m.position.y;
-    scene.add(m); orbs.push(m);
-  }
-})();
-
-// ── ESTRELLAS ─────────────────────────────────────────────
-(function() {
-  const N=2200, pos=new Float32Array(N*3);
-  for(let i=0;i<N;i++){
-    const th=Math.random()*Math.PI*2, ph=Math.acos(Math.random()*2-1), r=150+Math.random()*50;
-    pos[i*3]=r*Math.sin(ph)*Math.cos(th);
-    pos[i*3+1]=Math.abs(r*Math.cos(ph))+5;
-    pos[i*3+2]=r*Math.sin(ph)*Math.sin(th);
-  }
-  const geo=new THREE.BufferGeometry();
-  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
-  scene.add(new THREE.Points(geo,new THREE.PointsMaterial({color:0xffffff,size:0.18,sizeAttenuation:true})));
-})();
-
-// ── AUDIO ─────────────────────────────────────────────────
-let bgMusic   = null;    // HTMLAudioElement
-let stepAudio = null;    // AudioBuffer para Web Audio
-let actx      = null;
-let stepCooldown = false;
-// Intervalo entre pasos: ~380ms caminando, ~260ms corriendo
-const STEP_WALK = 380;
-const STEP_RUN  = 255;
-
-function initAudio() {
-  actx = new (window.AudioContext || window.webkitAudioContext)();
-
-  // Música de fondo via HTMLAudio (loop, sin pitch)
-  bgMusic = new Audio(ASSETS + 'dreamcore.mp3');
-  bgMusic.loop   = true;
-  bgMusic.volume = 0.45;
-  bgMusic.play().catch(() => {}); // autoplay guarded
-
-  // Cargar buffer de pasos para pitch variable
-  fetch(ASSETS + 'pasos.mp3')
-    .then(r => r.arrayBuffer())
-    .then(ab => actx.decodeAudioData(ab))
-    .then(buf => { stepAudio = buf; })
-    .catch(() => { stepAudio = null; });
-}
-
-function playStep(running) {
-  if (!actx || stepCooldown) return;
-
-  stepCooldown = true;
-  setTimeout(() => { stepCooldown = false; }, running ? STEP_RUN : STEP_WALK);
-
-  if (stepAudio) {
-    // Pitch realista: variación ±8% → suena natural, ni chipmunk ni toro
-    // 0.92 – 1.08 cubre el rango de peso/superficie sin exagerar
-    const pitchVariance = 0.92 + Math.random() * 0.16;
-
-    const source = actx.createBufferSource();
-    source.buffer = stepAudio;
-    source.playbackRate.value = pitchVariance;
-
-    const gain = actx.createGain();
-    // Volumen ligeramente aleatorio también (±10%) para realismo
-    gain.gain.value = 0.7 + Math.random() * 0.2;
-
-    source.connect(gain);
-    gain.connect(actx.destination);
-    source.start();
-  }
-}
-
-// ── GAME LOOP ─────────────────────────────────────────────
-const moveDir  = new THREE.Vector3();
-const camDir   = new THREE.Vector3();
-const camRight = new THREE.Vector3();
-const clock    = new THREE.Clock();
-let bobTime    = 0;
-
-document.getElementById('startBtn').addEventListener('click', () => {
-  initAudio();
-  gameStarted = true;
-  const ov = document.getElementById('overlay');
-  ov.classList.add('hidden');
-  canvas.requestPointerLock();
-});
-canvas.addEventListener('click', () => {
-  if (gameStarted && !locked) canvas.requestPointerLock();
-});
-
-function animate() {
-  requestAnimationFrame(animate);
-  const dt = Math.min(clock.getDelta(), 0.05);
-  const t  = clock.elapsedTime;
-
-  if (locked && gameStarted) {
-    const running = keys['ShiftLeft'] || keys['ShiftRight'];
-    const speed   = running ? 7.5 : 4.0;
-    let moving    = false;
-
-    moveDir.set(0, 0, 0);
-    camera.getWorldDirection(camDir); camDir.y = 0; camDir.normalize();
-    camRight.crossVectors(camDir, camera.up).normalize();
-
-    if (keys['KeyW']) { moveDir.addScaledVector(camDir,    1); moving = true; }
-    if (keys['KeyS']) { moveDir.addScaledVector(camDir,   -1); moving = true; }
-    if (keys['KeyA']) { moveDir.addScaledVector(camRight, -1); moving = true; }
-    if (keys['KeyD']) { moveDir.addScaledVector(camRight,  1); moving = true; }
-
-    if (moving) {
-      moveDir.normalize();
-      camera.position.addScaledVector(moveDir, speed * dt);
-      playStep(running);
-
-      // Headbob
-      bobTime += dt * (running ? 10 : 6.5);
-      camera.position.y = 1.7 + Math.sin(bobTime) * 0.038;
-    } else {
-      // Suave retorno a altura neutral
-      camera.position.y += (1.7 - camera.position.y) * 0.15;
+// SUELO (grass_ps1.jpg) con estilo pixelado
+texLoader.load(ASSETS_BASE + 'grass_ps1.jpg', 
+  (tex) => {
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(55, 55);
+    tex.magFilter = THREE.NearestFilter;
+    tex.minFilter = THREE.NearestFilter;
+    const groundMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.85, metalness: 0.05 });
+    const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(620, 620), groundMat);
+    groundPlane.rotation.x = -Math.PI / 2;
+    groundPlane.receiveShadow = true;
+    scene.add(groundPlane);
+  },
+  undefined,
+  () => {
+    console.warn("grass_ps1.jpg no disponible, creando textura procedural");
+    const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#1f3a12'; ctx.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 1800; i++) {
+      ctx.fillStyle = `rgba(80, 140, 40, ${Math.random() * 0.5})`;
+      ctx.fillRect(Math.floor(Math.random() * 512), Math.floor(Math.random() * 512), 2, 2);
     }
-
-    // Límite mundo
-    camera.position.x = Math.max(-250, Math.min(250, camera.position.x));
-    camera.position.z = Math.max(-250, Math.min(250, camera.position.z));
+    const proceduralTex = new THREE.CanvasTexture(canvas);
+    proceduralTex.wrapS = proceduralTex.wrapT = THREE.RepeatWrapping;
+    proceduralTex.repeat.set(70, 70);
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(620, 620), new THREE.MeshStandardMaterial({ map: proceduralTex, roughness: 0.9 }));
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
   }
+);
 
-  // Linterna
-  flashlight.position.copy(camera.position);
-  const fd = new THREE.Vector3();
-  camera.getWorldDirection(fd);
-  flashlight.target.position.copy(camera.position).addScaledVector(fd, 6);
-  flashlight.target.updateMatrixWorld();
+// ------------------------------------------------------------
+// 5. ÁRBOLES BILLBOARD (estilo retro/ps1)
+// ------------------------------------------------------------
+const trees = [];
+texLoader.load(ASSETS_BASE + 'tree_ps1.png',
+  (tex) => {
+    tex.magFilter = THREE.NearestFilter;
+    tex.minFilter = THREE.NearestFilter;
+    const leafMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.1 });
+    for (let i = 0; i < 155; i++) {
+      const scaleTree = 0.7 + Math.random() * 0.9;
+      const planeGeo = new THREE.PlaneGeometry(5.6 * scaleTree, 11.2 * scaleTree);
+      const treeMesh = new THREE.Mesh(planeGeo, leafMat);
+      let x, z;
+      do { x = (Math.random() - 0.5) * 290; z = (Math.random() - 0.5) * 290; }
+      while (Math.hypot(x, z) < 14);
+      treeMesh.position.set(x, 5.2 * scaleTree, z);
+      scene.add(treeMesh);
+      trees.push(treeMesh);
+    }
+  },
+  undefined,
+  () => {
+    console.warn("tree_ps1.png no cargado, usando árboles de cartón con canvas");
+    const createPixelTreeTexture = () => {
+      const cv = document.createElement('canvas'); cv.width = 128; cv.height = 256;
+      const ct = cv.getContext('2d');
+      ct.fillStyle = '#2f4d1a'; ct.fillRect(0, 0, 128, 256);
+      ct.fillStyle = '#4a2a12'; ct.fillRect(48, 150, 32, 106);
+      ct.fillStyle = '#2c6e1a'; ct.beginPath(); ct.moveTo(64, 20); ct.lineTo(20, 100); ct.lineTo(108, 100); ct.fill();
+      ct.fillStyle = '#3c8720'; ct.beginPath(); ct.moveTo(64, 50); ct.lineTo(28, 120); ct.lineTo(100, 120); ct.fill();
+      ct.fillStyle = '#52a32a'; ct.beginPath(); ct.moveTo(64, 80); ct.lineTo(36, 140); ct.lineTo(92, 140); ct.fill();
+      return new THREE.CanvasTexture(cv);
+    };
+    const fallbackTex = createPixelTreeTexture();
+    fallbackTex.magFilter = THREE.NearestFilter;
+    const matTree = new THREE.MeshBasicMaterial({ map: fallbackTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.1 });
+    for (let i = 0; i < 140; i++) {
+      const s = 0.8 + Math.random() * 0.8;
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(5.2 * s, 10.4 * s), matTree);
+      let x, z;
+      do { x = (Math.random() - 0.5) * 280; z = (Math.random() - 0.5) * 280; }
+      while (Math.hypot(x, z) < 12);
+      mesh.position.set(x, 5 * s, z);
+      scene.add(mesh);
+      trees.push(mesh);
+    }
+  }
+);
 
-  // Árboles billboard — solo rotan en Y (como Baldi's Basics)
-  trees.forEach(tr => {
-    tr.lookAt(camera.position.x, tr.position.y, camera.position.z);
-  });
-
-  // Orbes flotantes
-  orbs.forEach(o => {
-    o.position.y = o.userData.baseY + Math.sin(t * 0.8 + o.userData.offset) * 0.5;
-    o.rotation.y += dt * 0.4;
-  });
-
-  renderer.render(scene, camera);
+// Ruinas / monolitos
+const ruinMat = new THREE.MeshStandardMaterial({ color: 0x231a3a, emissive: 0x110522, roughness: 0.6 });
+for (let i = 0; i < 25; i++) {
+  const h = 2.2 + Math.random() * 6;
+  const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.65, h, 5), ruinMat);
+  const angle = Math.random() * Math.PI * 2;
+  const rad = 25 + Math.random() * 140;
+  const x = Math.cos(angle) * rad * (Math.random() > 0.5 ? 1 : -1);
+  const z = Math.sin(angle) * rad;
+  pillar.position.set(x, h / 2, z);
+  pillar.castShadow = true;
+  scene.add(pillar);
 }
-animate();
 
-window.addEventListener('resize', () => {
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
+// Orbes flotantes (misterios)
+const floatingOrbs = [];
+const colorsOrb = [0xff99cc, 0x99ccff, 0xffdd99, 0xcc99ff, 0xaaffdd];
+for (let i = 0; i < 18; i++) {
+  const col = colorsOrb[i % colorsOrb.length];
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 12), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.5 }));
+  orb.position.set((Math.random() - 0.5) * 180, 0.9 + Math.random() * 4.5, (Math.random() - 0.5) * 180);
+  orb.castShadow = true;
+  const lightOrb = new THREE.PointLight(col, 0.9, 10);
+  orb.add(lightOrb);
+  orb.userData = { baseY: orb.position.y, speed: 0.7 + Math.random() * 0.6, phase: Math.random() * Math.PI * 2 };
+  scene.add(orb);
+  floatingOrbs.push(orb);
+}
+
+// Partículas estelares (nieve / polvo onírico)
+const starFieldGeo = new THREE.BufferGeometry();
+const starCount = 1800;
+const starPos = [];
+for (let i = 0; i < starCount; i++) {
+  starPos.push((Math.random() - 0.5) * 400);
+  starPos.push((Math.random() - 0.5) * 120 + 10);
+  starPos.push((Math.random() - 0.5) * 350 - 50);
+}
+starFieldGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starPos), 3));
+const starMat = new THREE.PointsMaterial({ color: 0xcceeff, size: 0.12, transparent: true, opacity: 0.6 });
+const stars = new THREE.Points(starFieldGeo, starMat);
+scene.add(stars);
+
+// ------------------------------------------------------------
+// 6. AUDIO: MÚSICA + PASOS CON PITCH RANDOM (efecto realista)
+// ------------------------------------------------------------
+let audioContext = null;
+let bgMusicElement = null;
+let stepBuffer = null;
+let stepCooldown = false;
+const STEP_WALK_DELAY = 390;   // ms
+const STEP_RUN_DELAY = 260;
+
+function initAudioSystem() {
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    // Música de fondo (loop HTMLAudioElement para menor latencia y loop nativo)
+    bgMusicElement = new Audio(ASSETS_BASE + 'dreamcore.mp3');
+    bgMusicElement.loop = true;
+    bgMusicElement.volume = 0.48;
+    bgMusicElement.play().catch(e => console.warn("Autoplay bloqueado, se iniciará con interacción", e));
+    
+    // Cargar pasos
+    fetch(ASSETS_BASE + 'pasos.mp3')
+      .then(res => res.arrayBuffer())
+      .then(buf => audioContext.decodeAudioData(buf))
+      .then(decoded => { stepBuffer = decoded; })
+      .catch(err => console.warn("No se pudo cargar pasos.mp3, sonido de pasos desactivado", err));
+  } catch(e) { console.warn("Web Audio API no soportada", e); }
+}
+
+function playFootstep(running) {
+  if (!audioContext || !stepBuffer || stepCooldown) return;
+  stepCooldown = true;
+  setTimeout(() => { stepCooldown = false; }, running ? STEP_RUN_DELAY : STEP_WALK_DELAY);
+  
+  const source = audioContext.createBufferSource();
+  source.buffer = stepBuffer;
+  // Pitch random entre 0.88 y 1.12 -> efecto psicodélico / sueño
+  const pitchVar = 0.88 + Math.random() * 0.24;
+  source.playbackRate.value = pitchVar;
+  
+  const gainNode = audioContext.createGain();
+  gainNode.gain.value = 0.55 + Math.random() * 0.2;
+  source.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  source.start();
+}
+
+// ------------------------------------------------------------
+// 7. GAME LOOP con movimiento + headbob + actualización orbes / luces
+// ------------------------------------------------------------
+const moveVec = new THREE.Vector3();
+const forwardDir = new THREE.Vector3();
+const rightDir = new THREE.Vector3();
+let clockLoop = new THREE.Clock();
+let bobCounter = 0;
+let lastMoveState = false;
+
+function updateMovement(deltaTime) {
+  if (!locked || !gameStarted) return;
+  
+  const running = (keys['ShiftLeft'] || keys['ShiftRight']);
+  const currentSpeed = running ? 7.2 : 4.1;
+  let isMoving = false;
+  
+  moveVec.set(0, 0, 0);
+  camera.getWorldDirection(forwardDir);
+  forwardDir.y = 0;
+  forwardDir.normalize();
+  rightDir.crossVectors(forwardDir, camera.up).normalize();
+  
+  if (keys['KeyW']) { moveVec.addScaledVector(forwardDir, 1); isMoving = true; }
+  if (keys['KeyS']) { moveVec.addScaledVector(forwardDir, -1); isMoving = true; }
+  if (keys['KeyA']) { moveVec.addScaledVector(rightDir, -1); isMoving = true; }
+  if (keys['KeyD']) { moveVec.addScaledVector(rightDir, 1); isMoving = true; }
+  
+  if (isMoving) {
+    moveVec.normalize();
+    camera.position.addScaledVector(moveVec, currentSpeed * deltaTime);
+    // Pasos con pitch aleatorio
+    playFootstep(running);
+    
+    // Headbob onítico sutil
+    bobCounter += deltaTime * (running ? 11.5 : 7.8);
+    camera.position.y = 1.72 + Math.sin(bobCounter) * 0.032;
+  } else {
+    camera.position.y += (1.72 - camera.position.y) * 0.12;
+  }
+  
+  // Colisión suave con bordes del sueño
+  camera.position.x = Math.min(275, Math.max(-275, camera.position.x));
+  camera.position.z = Math.min(275, Math.max(-275, camera.position.z));
+}
+
+// Linterna sigue la cámara
+function updateFlashlight() {
+  flashlight.position.copy(camera.position);
+  const lookDir = new THREE.Vector3();
+  camera.getWorldDirection(lookDir);
+  flashlight.target.position.copy(camera.position).addScaledVector(lookDir, 6);
+  flashlight.target.updateMatrixWorld();
+}
+
+// Animación de orbes y luces flotantes
+let globalTime = 0;
+function updateWorldAnimations(delta) {
+  globalTime += delta;
+  floatingOrbs.forEach((orb, idx) => {
+    const offsetY = Math.sin(globalTime * 1.2 + orb.userData.phase) * 0.4;
+    orb.position.y = orb.userData.baseY + offsetY;
+    orb.rotation.x += 0.02;
+    orb.rotation.z += 0.015;
+  });
+  fairyLights.forEach((light, i) => {
+    light.intensity = 0.7 + Math.sin(globalTime * 1.5 + i) * 0.4;
+  });
+  // Estrellas rotación lenta
+  stars.rotation.y += 0.0008;
+}
+
+// Árboles billboard (siempre miran a cámara en Y)
+function updateBillboards() {
+  const camPos = camera.position;
+  trees.forEach(tree => {
+    tree.lookAt(camPos.x, tree.position.y, camPos.z);
+  });
+}
+
+// ------------------------------------------------------------
+// 8. EFECTO VHS DINÁMICO (chromatic aberration y scanlines en CSS)
+//    Ya añadido en HTML .vhs-overlay y .vhs-chromatic
+// ------------------------------------------------------------
+let vhsIntensity = 0;
+function updateVHSEffect(delta) {
+  // Pequeña vibración aleatoria en el overlay cromático
+  const chromaticDiv = document.querySelector('.vhs-chromatic');
+  if (chromaticDiv && locked) {
+    const shakeX = (Math.random() - 0.5) * 2;
+    const shakeY = (Math.random() - 0.5) * 1.5;
+    chromaticDiv.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
+    setTimeout(() => { if(chromaticDiv) chromaticDiv.style.transform = ''; }, 60);
+  }
+  // Variación opacidad scanlines
+  const scanDiv = document.querySelector('.vhs-overlay');
+  if (scanDiv && locked) {
+    const flicker = 0.4 + Math.random() * 0.2;
+    scanDiv.style.opacity = flicker;
+  }
+}
+
+// ------------------------------------------------------------
+// 9. INICIO DEL JUEGO
+// ------------------------------------------------------------
+document.getElementById('startBtn').addEventListener('click', () => {
+  if (gameStarted) return;
+  initAudioSystem();
+  gameStarted = true;
+  const overlayDiv = document.getElementById('overlay');
+  overlayDiv.classList.add('hidden');
+  setTimeout(() => {
+    renderer.domElement.requestPointerLock();
+  }, 200);
 });
+
+// click para reconectar pointer si es necesario
+renderer.domElement.addEventListener('click', () => {
+  if (gameStarted && !locked) renderer.domElement.requestPointerLock();
+});
+
+// ------------------------------------------------------------
+// 10. BUCLE PRINCIPAL DE ANIMACIÓN
+// ------------------------------------------------------------
+let lastTime = performance.now();
+function mainLoop() {
+  const now = performance.now();
+  let delta = Math.min(0.033, (now - lastTime) / 1000);
+  lastTime = now;
+  if (delta < 0.003) delta = 0.016;
+  
+  if (gameStarted) {
+    updateMovement(delta);
+    updateFlashlight();
+    updateWorldAnimations(delta);
+    updateBillboards();
+    updateVHSEffect(delta);
+  }
+  
+  renderer.render(scene, camera);
+  requestAnimationFrame(mainLoop);
+}
+
+mainLoop();
+
+// Redimensionamiento
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+console.log("✨ DREAMCORE activado — Bosque infinito, VHS y pasos con pitch aleatorio ✨");
 </script>
 </body>
 </html>
