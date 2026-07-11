@@ -3,170 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dreamcore 3D · Camino Infinito con Pasos</title>
+    <title>Dreamcore · Camino Infinito (Primera Persona)</title>
     <style>
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
             overflow: hidden;
+            background: #0a0a12;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            cursor: crosshair;
         }
-        #info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            background: rgba(0,0,0,0.6);
-            padding: 12px 24px;
-            border-radius: 30px;
-            backdrop-filter: blur(5px);
-            pointer-events: none;
-            z-index: 10;
-            font-size: 18px;
-            border: 1px solid rgba(255,255,255,0.15);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            display: flex;
-            gap: 30px;
+        canvas {
+            display: block;
         }
-        #info span {
-            font-weight: bold;
-            color: #ffd700;
-        }
-        #controls {
-            position: absolute;
-            bottom: 30px;
+
+        #hud {
+            position: fixed;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            display: flex;
-            gap: 15px;
-            background: rgba(0,0,0,0.7);
-            padding: 15px 25px;
-            border-radius: 50px;
+            color: rgba(255,255,255,0.8);
+            background: rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        #controls button {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            padding: 10px 25px;
-            border-radius: 30px;
+            padding: 12px 28px;
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            gap: 35px;
             font-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: bold;
+            font-weight: 500;
             letter-spacing: 0.5px;
-            backdrop-filter: blur(5px);
-            min-width: 80px;
+            pointer-events: none;
+            user-select: none;
         }
-        #controls button:hover {
-            background: rgba(255,215,0,0.2);
-            border-color: #ffd700;
-            transform: scale(1.05);
+        #hud span {
+            color: #ffd700;
+            font-weight: 700;
         }
-        #controls button:active {
-            transform: scale(0.95);
-        }
-        #controls button.active {
-            background: rgba(255,215,0,0.3);
-            border-color: #ffd700;
-            box-shadow: 0 0 20px rgba(255,215,0,0.2);
-        }
-        #loading {
-            position: absolute;
+
+        #crosshair {
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: white;
-            font-size: 24px;
-            background: rgba(0,0,0,0.8);
-            padding: 20px 40px;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        #crosshair::before,
+        #crosshair::after {
+            content: '';
+            position: absolute;
+            background: rgba(255,255,255,0.6);
+        }
+        #crosshair::before {
+            width: 2px;
+            height: 18px;
+            top: -9px;
+            left: -1px;
+        }
+        #crosshair::after {
+            width: 18px;
+            height: 2px;
+            top: -1px;
+            left: -9px;
+        }
+
+        #controls-hint {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.2);
+            font-size: 13px;
+            z-index: 10;
+            background: rgba(0,0,0,0.3);
+            padding: 6px 18px;
             border-radius: 20px;
-            z-index: 20;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            text-align: center;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.04);
+            pointer-events: none;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #0a0a12;
+            z-index: 100;
+            color: white;
+            font-size: 22px;
         }
         #loading .spinner {
-            display: inline-block;
-            animation: spin 1s linear infinite;
-            font-size: 40px;
+            font-size: 50px;
+            animation: spin 1.2s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        #loading .sub {
+            font-size: 14px;
+            opacity: 0.4;
+            margin-top: 10px;
+        }
+        #loading .progress-bar {
+            width: 200px;
+            height: 3px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        #loading .progress-bar .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b);
+            border-radius: 4px;
+            transition: width 0.3s;
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
         .fade-out {
-            animation: fadeOut 0.8s forwards;
+            animation: fadeOut 0.6s forwards;
         }
         @keyframes fadeOut {
             to { opacity: 0; pointer-events: none; }
         }
-        #controls-hint {
-            position: absolute;
-            bottom: 100px;
+
+        #loop-notification {
+            position: fixed;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255,255,255,0.3);
-            font-size: 14px;
-            z-index: 10;
-            background: rgba(0,0,0,0.4);
-            padding: 8px 20px;
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.05);
+            transform: translate(-50%, -50%) scale(0.8);
+            z-index: 20;
+            color: #ffd700;
+            font-size: 48px;
+            font-weight: 800;
             pointer-events: none;
-            white-space: nowrap;
+            opacity: 0;
+            text-shadow: 0 0 40px rgba(255,215,0,0.3);
         }
-        @media (max-width: 768px) {
-            #info {
-                font-size: 14px;
+        #loop-notification.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            animation: pulse 0.8s ease-out forwards;
+        }
+        @keyframes pulse {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            30% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            #hud {
+                font-size: 13px;
                 padding: 8px 16px;
-                gap: 15px;
-                top: 10px;
-                left: 10px;
-            }
-            #controls {
-                padding: 10px 15px;
-                gap: 10px;
-                bottom: 15px;
-                width: 95%;
-            }
-            #controls button {
-                padding: 8px 15px;
-                font-size: 14px;
-                min-width: 60px;
+                gap: 18px;
+                bottom: 20px;
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 90%;
             }
             #controls-hint {
                 display: none;
+            }
+            #loop-notification {
+                font-size: 28px;
             }
         }
     </style>
 </head>
 <body>
+
     <div id="loading">
         <div class="spinner">🌀</div>
-        <div style="margin-top: 15px;">Cargando Dreamcore...</div>
-        <div style="font-size: 14px; opacity: 0.6; margin-top: 8px;">(Haz clic para activar el audio)</div>
+        <div>Cargando Dreamcore...</div>
+        <div class="sub">Haz clic para comenzar</div>
+        <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
     </div>
-    
-    <div id="info">
+
+    <div id="crosshair"></div>
+
+    <div id="hud">
         <div>🚶 <span id="distDisplay">0.00</span> km</div>
         <div>🔄 <span id="loopDisplay">0</span></div>
         <div>👣 <span id="stepDisplay">0</span></div>
+        <div>⚡ <span id="speedDisplay">1</span>x</div>
     </div>
-    
-    <div id="controls">
-        <button id="resetBtn">⟳ Reiniciar</button>
-        <button id="speedBtn">⏩ x1</button>
-        <button id="toggleMusicBtn">🔊 Música</button>
-        <button id="toggleStepsBtn">👣 Pasos</button>
-    </div>
-    
-    <div id="controls-hint">WASD · Caminar · Espacio para saltar</div>
 
-    <!-- Importar Three.js -->
+    <div id="controls-hint">S · Adelante · W · Atrás · Mouse · Mirar · Espacio · Saltar</div>
+
+    <div id="loop-notification">🌀 BUCLE #<span id="loopNotifCount">0</span></div>
+
     <script type="importmap">
         {
             "imports": {
@@ -178,16 +218,16 @@
 
     <script type="module">
         import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
         // --- CONFIGURACIÓN ---
         const CONFIG = {
-            maxDistance: 12.0,
-            teleportOffset: 8.0,
-            speed: 0.035,
-            treeSpacing: 1.8,
-            numTrees: 120,
-            stepInterval: 0.3, // segundos entre pasos
+            maxDistance: 10.0,
+            teleportOffset: 7.0,
+            walkSpeed: 0.045,
+            treeSpacing: 2.2,
+            numTrees: 140,
+            stepInterval: 0.35,
+            mouseSensitivity: 0.002,
         };
 
         // --- ESTADO ---
@@ -195,53 +235,57 @@
             distance: 0,
             loopCount: 0,
             speedMultiplier: 1,
-            clock: new THREE.Clock(),
-            trees: [],
-            treePositions: [],
-            isMoving: false,
             steps: 0,
             stepTimer: 0,
-            keys: { w: false, a: false, s: false, d: false },
             isWalking: false,
+            keys: { s: false, w: false, a: false, d: false }, // S = adelante, W = atrás
+            euler: new THREE.Euler(0, 0, 0, 'YXZ'),
+            clock: new THREE.Clock(),
+            trees: [],
         };
 
         // --- DOM REFS ---
         const distDisplay = document.getElementById('distDisplay');
         const loopDisplay = document.getElementById('loopDisplay');
         const stepDisplay = document.getElementById('stepDisplay');
+        const speedDisplay = document.getElementById('speedDisplay');
+        const loopNotif = document.getElementById('loop-notification');
+        const loopNotifCount = document.getElementById('loopNotifCount');
         const loadingDiv = document.getElementById('loading');
+        const progressFill = document.getElementById('progressFill');
 
-        // --- ESCENA Y RENDERERS ---
+        // --- ESCENA ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a1a2e);
-        scene.fog = new THREE.FogExp2(0x1a1a2e, 0.008);
+        scene.background = new THREE.Color(0x0d0d1a);
+        scene.fog = new THREE.FogExp2(0x0d0d1a, 0.006);
 
-        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 200);
-        camera.position.set(0, 3.2, 6);
-        camera.lookAt(0, 0.5, -15);
+        // --- CÁMARA ---
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 150);
+        camera.position.set(0, 1.6, 0);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        // --- RENDER ---
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2;
-        document.body.appendChild(renderer.domElement);
+        renderer.toneMappingExposure = 1.0;
+        document.body.prepend(renderer.domElement);
 
         // --- CARGAR TEXTURAS ---
         const textureLoader = new THREE.TextureLoader();
         let skyTexture, grassTexture, treeTexture;
-        let texturesLoaded = 0;
-        const totalTextures = 3;
+        let loadProgress = 0;
 
-        function checkLoading() {
-            texturesLoaded++;
-            if (texturesLoaded === totalTextures) {
+        function updateProgress() {
+            loadProgress += 1 / 3;
+            progressFill.style.width = Math.min(loadProgress * 100, 100) + '%';
+            if (loadProgress >= 1) {
                 setTimeout(() => {
                     loadingDiv.classList.add('fade-out');
-                    setTimeout(() => loadingDiv.remove(), 800);
-                }, 500);
+                    setTimeout(() => loadingDiv.remove(), 600);
+                }, 300);
                 initScene();
             }
         }
@@ -250,9 +294,10 @@
             return new Promise((resolve) => {
                 textureLoader.load(
                     url,
-                    (texture) => {
-                        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-                        resolve(texture);
+                    (tex) => {
+                        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+                        resolve(tex);
+                        updateProgress();
                     },
                     undefined,
                     () => {
@@ -260,338 +305,327 @@
                         canvas.width = 64;
                         canvas.height = 64;
                         const ctx = canvas.getContext('2d');
-                        ctx.fillStyle = fallbackColor || '#4a6b4a';
+                        ctx.fillStyle = fallbackColor || '#3a5a3a';
                         ctx.fillRect(0, 0, 64, 64);
                         const tex = new THREE.CanvasTexture(canvas);
                         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
                         resolve(tex);
+                        updateProgress();
                     }
                 );
             });
         }
 
-        const skyPromise = loadTexture('dreamcore.jpg', '#2a2a4a');
+        const skyPromise = loadTexture('dreamcore.jpg', '#1a1a3a');
         const grassPromise = loadTexture('grass_ps1.png', '#4a7a4a');
         const treePromise = loadTexture('tree_ps1.png', '#5a8a5a');
 
+        let assetsReady = false;
         Promise.all([skyPromise, grassPromise, treePromise]).then(([sky, grass, tree]) => {
             skyTexture = sky;
             grassTexture = grass;
             treeTexture = tree;
-            checkLoading();
+            assetsReady = true;
         });
 
-        // --- AUDIO (pasos.mp3) ---
+        // --- AUDIO ---
         let stepAudio, musicAudio;
         let stepEnabled = true;
         let musicEnabled = true;
 
         function loadAudio() {
             try {
-                // Pasos
                 stepAudio = new Audio('pasos.mp3');
-                stepAudio.volume = 0.3;
+                stepAudio.volume = 0.25;
                 stepAudio.load();
-                
-                // Música
                 musicAudio = new Audio('dreamcore.mp3');
                 musicAudio.loop = true;
-                musicAudio.volume = 0.4;
+                musicAudio.volume = 0.35;
                 musicAudio.load();
-            } catch (e) {
-                console.log('Audio no disponible');
-            }
+            } catch (e) { console.log('Audio no disponible'); }
         }
 
         function playStep() {
             if (!stepEnabled || !stepAudio) return;
-            try {
-                // Reiniciar y reproducir
-                stepAudio.currentTime = 0;
-                stepAudio.play().catch(() => {});
-            } catch (e) {}
+            try { stepAudio.currentTime = 0; stepAudio.play().catch(() => {}); } catch (e) {}
         }
 
-        function toggleMusic() {
-            if (!musicAudio) return;
-            musicEnabled = !musicEnabled;
-            if (musicEnabled) {
-                musicAudio.play().catch(() => {});
-            } else {
-                musicAudio.pause();
-            }
-            return musicEnabled;
-        }
+        // --- ESCENA 3D ---
+        let skyMesh, groundMesh;
+        let treeGroups = [];
 
-        function toggleSteps() {
-            stepEnabled = !stepEnabled;
-            return stepEnabled;
-        }
-
-        // --- CREAR CIELO ---
         function createSky() {
-            const skyGeo = new THREE.SphereGeometry(80, 32, 32);
-            const skyMat = new THREE.MeshBasicMaterial({
-                map: skyTexture,
-                side: THREE.BackSide,
-            });
-            const sky = new THREE.Mesh(skyGeo, skyMat);
-            sky.position.y = 10;
-            scene.add(sky);
-            return sky;
+            const geo = new THREE.SphereGeometry(90, 32, 32);
+            const mat = new THREE.MeshBasicMaterial({ map: skyTexture, side: THREE.BackSide });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.y = 15;
+            scene.add(mesh);
+            return mesh;
         }
 
-        // --- CREAR SUELO ---
         function createGround() {
-            const groundGeo = new THREE.PlaneGeometry(200, 200);
-            const groundMat = new THREE.MeshStandardMaterial({
+            const geo = new THREE.PlaneGeometry(300, 300);
+            const mat = new THREE.MeshStandardMaterial({
                 map: grassTexture,
-                roughness: 0.8,
+                roughness: 0.9,
                 metalness: 0.0,
                 side: THREE.DoubleSide,
             });
-            const ground = new THREE.Mesh(groundGeo, groundMat);
-            ground.rotation.x = -Math.PI / 2;
-            ground.position.y = -0.5;
-            ground.receiveShadow = true;
-            scene.add(ground);
-            return ground;
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.y = -0.5;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            return mesh;
         }
 
-        // --- CREAR ÁRBOL CON EFECTO BALDI ---
-        function createTree(position) {
+        // --- ÁRBOL CON EFECTO BALDI 2D (siempre mirando al jugador) ---
+        function createTree(pos) {
             const group = new THREE.Group();
-            
-            const trunkGeo = new THREE.CylinderGeometry(0.12, 0.18, 0.8, 6);
-            const trunkMat = new THREE.MeshStandardMaterial({
-                color: 0x6b4c3b,
-                roughness: 0.9,
-                metalness: 0.0,
-            });
-            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-            trunk.position.y = 0.4;
+
+            // Tronco 3D
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.16, 0.7, 5),
+                new THREE.MeshStandardMaterial({ color: 0x5a3d2b, roughness: 0.9 })
+            );
+            trunk.position.y = 0.35;
             trunk.castShadow = true;
             group.add(trunk);
 
-            const leafGeo = new THREE.SphereGeometry(0.7, 8, 8);
+            // --- Copa 2D (billboard) con tree_ps1.png ---
+            // Siempre mira al jugador (efecto Baldi)
+            const leafGeo = new THREE.PlaneGeometry(1.4, 1.4);
             const leafMat = new THREE.MeshStandardMaterial({
                 map: treeTexture,
-                roughness: 0.6,
-                metalness: 0.0,
                 transparent: true,
                 side: THREE.DoubleSide,
+                roughness: 0.5,
+                metalness: 0.0,
+                alphaTest: 0.1,
             });
             const leaves = new THREE.Mesh(leafGeo, leafMat);
-            leaves.position.y = 1.1;
-            leaves.castShadow = true;
+            leaves.position.y = 1.0;
+            leaves.castShadow = false;
             group.add(leaves);
 
-            // Ojos (efecto Baldi)
-            const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            const pupilMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            
-            const eyeGroupL = new THREE.Group();
-            const eyeL = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.22), eyeMat);
-            eyeL.position.set(0, 0, 0.01);
-            const pupilL = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 0.12), pupilMat);
-            pupilL.position.set(0, 0, 0.02);
-            eyeGroupL.add(eyeL);
-            eyeGroupL.add(pupilL);
-            eyeGroupL.position.set(-0.22, 1.25, 0.55);
-            group.add(eyeGroupL);
+            // --- OJOS (también 2D billboard) ---
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+            const pupilMat = new THREE.MeshBasicMaterial({ color: 0x111111, side: THREE.DoubleSide });
 
-            const eyeGroupR = new THREE.Group();
-            const eyeR = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.22), eyeMat);
-            eyeR.position.set(0, 0, 0.01);
-            const pupilR = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 0.12), pupilMat);
-            pupilR.position.set(0, 0, 0.02);
-            eyeGroupR.add(eyeR);
-            eyeGroupR.add(pupilR);
-            eyeGroupR.position.set(0.22, 1.25, 0.55);
-            group.add(eyeGroupR);
-
-            group.userData = {
-                eyeL: eyeGroupL,
-                eyeR: eyeGroupR,
-                pupilL: pupilL,
-                pupilR: pupilR,
+            const makeEye = (xOff) => {
+                const g = new THREE.Group();
+                // Ojo blanco
+                const white = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.2), eyeMat);
+                white.position.z = 0.01;
+                // Pupila
+                const pupil = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 0.11), pupilMat);
+                pupil.position.z = 0.02;
+                g.add(white);
+                g.add(pupil);
+                g.position.set(xOff, 1.15, 0.7);
+                group.add(g);
+                return { group: g, pupil };
             };
 
-            group.position.copy(position);
+            const eyeL = makeEye(-0.2);
+            const eyeR = makeEye(0.2);
+
+            // Guardar referencias para actualizar la mirada
+            group.userData = { 
+                eyeL, 
+                eyeR, 
+                leaves,
+                isBillboard: true 
+            };
+
+            group.position.copy(pos);
             group.castShadow = true;
             scene.add(group);
             return group;
         }
 
-        // --- GENERAR POSICIONES ---
         function generateTreePositions() {
             const positions = [];
             const total = CONFIG.numTrees;
             for (let i = 0; i < total; i++) {
-                const z = -i * CONFIG.treeSpacing - 2;
-                const x = (Math.random() - 0.5) * 3.0;
+                const z = -i * CONFIG.treeSpacing - 3;
+                const x = (Math.random() - 0.5) * 4.5;
                 positions.push(new THREE.Vector3(x, -0.5, z));
             }
             return positions;
         }
 
-        // --- INICIALIZAR ---
-        let skyMesh, groundMesh;
-        let treeGroups = [];
+        function createAtmosphere() {
+            const count = 600;
+            const pos = new Float32Array(count * 3);
+            for (let i = 0; i < count * 3; i++) {
+                pos[i] = (Math.random() - 0.5) * 70;
+                if (i % 3 === 1) pos[i] = Math.random() * 12 - 1;
+                if (i % 3 === 2) pos[i] = -Math.random() * 60 - 10;
+            }
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            const mat = new THREE.PointsMaterial({
+                color: 0x8888bb,
+                size: 0.06,
+                transparent: true,
+                opacity: 0.3,
+                blending: THREE.AdditiveBlending,
+            });
+            scene.add(new THREE.Points(geo, mat));
+        }
 
+        // --- INICIALIZAR ---
         function initScene() {
             skyMesh = createSky();
             groundMesh = createGround();
-            
+            createAtmosphere();
+
             // Luces
-            const ambientLight = new THREE.AmbientLight(0x404060, 0.6);
-            scene.add(ambientLight);
-            
-            const dirLight = new THREE.DirectionalLight(0xffeedd, 1.8);
-            dirLight.position.set(10, 20, 10);
-            dirLight.castShadow = true;
-            dirLight.shadow.mapSize.width = 2048;
-            dirLight.shadow.mapSize.height = 2048;
-            dirLight.shadow.camera.near = 0.5;
-            dirLight.shadow.camera.far = 50;
-            dirLight.shadow.camera.left = -20;
-            dirLight.shadow.camera.right = 20;
-            dirLight.shadow.camera.top = 20;
-            dirLight.shadow.camera.bottom = -20;
-            scene.add(dirLight);
-            
-            const fillLight = new THREE.DirectionalLight(0x8888ff, 0.4);
-            fillLight.position.set(-10, 5, -10);
-            scene.add(fillLight);
-            
-            const hemiLight = new THREE.HemisphereLight(0x8888ff, 0x444422, 0.6);
-            scene.add(hemiLight);
-            
+            const ambient = new THREE.AmbientLight(0x404070, 0.5);
+            scene.add(ambient);
+
+            const sun = new THREE.DirectionalLight(0xffeedd, 1.6);
+            sun.position.set(15, 25, 10);
+            sun.castShadow = true;
+            sun.shadow.mapSize.width = 2048;
+            sun.shadow.mapSize.height = 2048;
+            sun.shadow.camera.near = 0.5;
+            sun.shadow.camera.far = 60;
+            sun.shadow.camera.left = -25;
+            sun.shadow.camera.right = 25;
+            sun.shadow.camera.top = 25;
+            sun.shadow.camera.bottom = -25;
+            scene.add(sun);
+
+            const fill = new THREE.DirectionalLight(0x8888ff, 0.3);
+            fill.position.set(-10, 5, -10);
+            scene.add(fill);
+
+            const hemi = new THREE.HemisphereLight(0x8888ff, 0x444422, 0.4);
+            scene.add(hemi);
+
             // Árboles
             const positions = generateTreePositions();
-            treeGroups = positions.map(pos => createTree(pos));
-            state.treePositions = positions;
-            state.trees = treeGroups;
-            
-            // Partículas
-            createAtmosphere();
-            
+            treeGroups = positions.map(p => createTree(p));
+
             // Audio
             loadAudio();
-            
+
             // Eventos
             setupControls();
-            
+
+            // Iniciar loop
             animate();
+
+            // Intentar reproducir música
+            document.addEventListener('click', () => {
+                if (musicAudio && musicEnabled) musicAudio.play().catch(() => {});
+            }, { once: true });
         }
 
-        // --- ATMÓSFERA ---
-        function createAtmosphere() {
-            const particleCount = 800;
-            const positions = new Float32Array(particleCount * 3);
-            for (let i = 0; i < particleCount * 3; i++) {
-                positions[i] = (Math.random() - 0.5) * 60;
-                if (i % 3 === 1) positions[i] = Math.random() * 15 - 2;
-                if (i % 3 === 2) positions[i] = -Math.random() * 50 - 10;
-            }
-            const geo = new THREE.BufferGeometry();
-            geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            const mat = new THREE.PointsMaterial({
-                color: 0xaaaadd,
-                size: 0.08,
-                transparent: true,
-                opacity: 0.4,
-                blending: THREE.AdditiveBlending,
-            });
-            const particles = new THREE.Points(geo, mat);
-            scene.add(particles);
-        }
-
-        // --- ACTUALIZAR ÁRBOLES (bucle infinito) ---
+        // --- ACTUALIZAR ÁRBOLES (bucle infinito + efecto Baldi) ---
         function updateTrees(distance) {
             const spacing = CONFIG.treeSpacing;
             const total = CONFIG.numTrees;
-            const playerZ = -distance * 0.8;
-            
-            treeGroups.forEach((tree, index) => {
-                const baseZ = -index * spacing - 2;
+            const playerZ = -distance * 0.7;
+
+            treeGroups.forEach((tree, i) => {
+                const baseZ = -i * spacing - 3;
                 let z = baseZ + playerZ;
-                
-                if (z > 3) z -= total * spacing;
-                if (z < -total * spacing - 5) z += total * spacing;
-                
+                if (z > 4) z -= total * spacing;
+                if (z < -total * spacing - 6) z += total * spacing;
                 tree.position.set(tree.position.x, -0.5, z);
             });
         }
 
-        // --- EFECTO BALDI ---
-        function updateEyes() {
-            const playerPos = new THREE.Vector3(0, 0, -state.distance * 0.8);
-            
+        // --- EFECTO BALDI 2D (billboard + ojos) ---
+        function updateBaldiEffect() {
+            const playerPos = new THREE.Vector3(0, 1.6, -state.distance * 0.7);
+
             treeGroups.forEach(tree => {
-                const eyeL = tree.userData.eyeL;
-                const eyeR = tree.userData.eyeR;
-                if (!eyeL || !eyeR) return;
-                
+                const { eyeL, eyeR, leaves } = tree.userData;
+                if (!eyeL) return;
+
                 const treePos = tree.position.clone();
+                treePos.y = 1.0; // altura de los ojos/hojas
+
+                // Dirección al jugador
                 const dir = new THREE.Vector3().subVectors(playerPos, treePos);
                 dir.y = 0;
                 if (dir.length() > 0.01) dir.normalize();
-                
+
+                // Ángulo para billboard
                 const angle = Math.atan2(dir.x, dir.z);
-                eyeL.rotation.y = angle;
-                eyeR.rotation.y = angle;
-                
-                const pupilL = tree.userData.pupilL;
-                const pupilR = tree.userData.pupilR;
-                if (pupilL && pupilR) {
-                    const pupilOffset = 0.04;
-                    const lookX = Math.sin(angle) * pupilOffset;
-                    const lookZ = Math.cos(angle) * pupilOffset;
-                    pupilL.position.set(lookX, 0, 0.02 + lookZ * 0.1);
-                    pupilR.position.set(lookX, 0, 0.02 + lookZ * 0.1);
+
+                // 1. Hojas (billboard) - siempre miran al jugador
+                if (leaves) {
+                    leaves.rotation.y = angle;
                 }
+
+                // 2. Ojos (billboard) - siempre miran al jugador
+                eyeL.group.rotation.y = angle;
+                eyeR.group.rotation.y = angle;
+
+                // 3. Pupilas - se mueven dentro del ojo (efecto de mirada)
+                const pupilOffset = 0.035;
+                const lx = Math.sin(angle) * pupilOffset;
+                const lz = Math.cos(angle) * pupilOffset * 0.5;
+                eyeL.pupil.position.set(lx, 0, 0.02 + lz);
+                eyeR.pupil.position.set(lx, 0, 0.02 + lz);
             });
         }
 
-        // --- MOVIMIENTO CON WASD ---
+        // --- MOVIMIENTO ---
         function handleMovement(delta) {
-            const speed = CONFIG.speed * state.speedMultiplier;
+            const speed = CONFIG.walkSpeed * state.speedMultiplier;
             let moving = false;
-            
-            // Movimiento en Z (adelante/atrás)
-            if (state.keys.w) {
-                state.distance += speed * delta * 30;
-                moving = true;
-            }
+
+            // Dirección basada en la rotación de la cámara
+            const forward = new THREE.Vector3(0, 0, -1);
+            const right = new THREE.Vector3(1, 0, 0);
+            forward.applyQuaternion(camera.quaternion);
+            right.applyQuaternion(camera.quaternion);
+            forward.y = 0;
+            right.y = 0;
+            forward.normalize();
+            right.normalize();
+
+            const moveDelta = speed * delta * 40;
+
+            // S = adelante, W = atrás
             if (state.keys.s) {
-                state.distance -= speed * delta * 30;
+                state.distance += moveDelta;
                 moving = true;
             }
-            
-            // Movimiento lateral (A/D) - efecto visual de balanceo
+            if (state.keys.w) {
+                state.distance -= moveDelta;
+                moving = true;
+            }
             if (state.keys.a) {
-                camera.position.x -= speed * delta * 15;
+                camera.position.x -= right.x * moveDelta * 0.8;
+                camera.position.z -= right.z * moveDelta * 0.8;
                 moving = true;
             }
             if (state.keys.d) {
-                camera.position.x += speed * delta * 15;
+                camera.position.x += right.x * moveDelta * 0.8;
+                camera.position.z += right.z * moveDelta * 0.8;
                 moving = true;
             }
-            
-            // Limitar movimiento lateral
-            camera.position.x = Math.max(-3, Math.min(3, camera.position.x));
-            
+
             // Truco de la escalera infinita
             if (state.distance >= CONFIG.maxDistance) {
                 state.distance -= CONFIG.teleportOffset;
-                state.loopCount += 1;
+                state.loopCount++;
+                loopNotifCount.textContent = state.loopCount;
+                loopNotif.classList.remove('show');
+                void loopNotif.offsetWidth;
+                loopNotif.classList.add('show');
+                setTimeout(() => loopNotif.classList.remove('show'), 900);
             }
-            if (state.distance < 0) {
-                state.distance = 0;
-            }
-            
-            // Sonido de pasos
+            if (state.distance < 0) state.distance = 0;
+
+            // Pasos
             if (moving) {
                 state.stepTimer += delta;
                 if (state.stepTimer >= CONFIG.stepInterval / state.speedMultiplier) {
@@ -602,49 +636,31 @@
             } else {
                 state.stepTimer = 0;
             }
-            
+
             state.isWalking = moving;
-            
-            // Actualizar UI
+
+            // Actualizar HUD
             distDisplay.textContent = state.distance.toFixed(2);
             loopDisplay.textContent = state.loopCount;
             stepDisplay.textContent = state.steps;
-            
+            speedDisplay.textContent = state.speedMultiplier;
+
             return moving;
         }
 
         // --- ANIMACIÓN ---
-        let frameCount = 0;
-        let lastFpsUpdate = 0;
-
         function animate() {
             requestAnimationFrame(animate);
-            
             const delta = state.clock.getDelta();
-            frameCount++;
-            
-            // Movimiento
+
+            if (!assetsReady) return;
+
             handleMovement(delta);
-            
-            // Actualizar árboles
             updateTrees(state.distance);
-            updateEyes();
-            
-            // Cámara
-            const camZ = -state.distance * 0.8;
-            camera.position.z = camZ + 6;
-            camera.lookAt(camera.position.x * 0.3, 0.5, camZ - 10);
-            
-            // Cielo
-            if (skyMesh) skyMesh.rotation.y += 0.0001;
-            
-            // FPS
-            const time = performance.now();
-            if (time - lastFpsUpdate > 1000) {
-                lastFpsUpdate = time;
-                frameCount = 0;
-            }
-            
+            updateBaldiEffect(); // Efecto 2D billboard + ojos
+
+            if (skyMesh) skyMesh.rotation.y += 0.00008;
+
             renderer.render(scene, camera);
         }
 
@@ -652,80 +668,79 @@
         function setupControls() {
             // Teclado
             document.addEventListener('keydown', (e) => {
-                const key = e.key.toLowerCase();
-                if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
-                    state.keys[key] = true;
+                const k = e.key.toLowerCase();
+                // S = adelante, W = atrás
+                if (['s', 'w', 'a', 'd'].includes(k)) {
+                    state.keys[k] = true;
                     e.preventDefault();
                 }
-                // Espacio para saltar (efecto visual)
-                if (key === ' ') {
+                if (k === ' ') {
                     e.preventDefault();
-                    // Pequeño salto visual
-                    camera.position.y = 3.8;
-                    setTimeout(() => camera.position.y = 3.2, 300);
+                    camera.position.y = 2.2;
+                    setTimeout(() => camera.position.y = 1.6, 350);
+                }
+                // Velocidad con 1,2,3
+                if (k === '1') { state.speedMultiplier = 1; speedDisplay.textContent = '1'; }
+                if (k === '2') { state.speedMultiplier = 2; speedDisplay.textContent = '2'; }
+                if (k === '3') { state.speedMultiplier = 3; speedDisplay.textContent = '3'; }
+                // Mute con M
+                if (k === 'm') {
+                    musicEnabled = !musicEnabled;
+                    if (musicAudio) {
+                        if (musicEnabled) musicAudio.play().catch(() => {});
+                        else musicAudio.pause();
+                    }
                 }
             });
-            
+
             document.addEventListener('keyup', (e) => {
-                const key = e.key.toLowerCase();
-                if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
-                    state.keys[key] = false;
+                const k = e.key.toLowerCase();
+                if (['s', 'w', 'a', 'd'].includes(k)) {
+                    state.keys[k] = false;
                     e.preventDefault();
                 }
             });
-            
-            // Botones
-            document.getElementById('resetBtn').addEventListener('click', () => {
-                state.distance = 0;
-                state.loopCount = 0;
-                state.steps = 0;
-                camera.position.x = 0;
-            });
-            
-            document.getElementById('speedBtn').addEventListener('click', function() {
-                if (state.speedMultiplier === 1) {
-                    state.speedMultiplier = 2;
-                    this.textContent = '⏩ x2';
-                } else if (state.speedMultiplier === 2) {
-                    state.speedMultiplier = 3;
-                    this.textContent = '⏩ x3';
-                } else {
-                    state.speedMultiplier = 1;
-                    this.textContent = '⏩ x1';
+
+            // Mouse (pointer lock)
+            let isLocked = false;
+
+            renderer.domElement.addEventListener('click', () => {
+                if (!isLocked) {
+                    renderer.domElement.requestPointerLock();
                 }
             });
-            
-            document.getElementById('toggleMusicBtn').addEventListener('click', function() {
-                const enabled = toggleMusic();
-                this.textContent = enabled ? '🔊 Música' : '🔇 Silencio';
-                this.classList.toggle('active', !enabled);
+
+            document.addEventListener('pointerlockchange', () => {
+                isLocked = !!document.pointerLockElement;
             });
-            
-            document.getElementById('toggleStepsBtn').addEventListener('click', function() {
-                const enabled = toggleSteps();
-                this.textContent = enabled ? '👣 Pasos' : '🔇 Pasos';
-                this.classList.toggle('active', !enabled);
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isLocked) return;
+
+                const sens = CONFIG.mouseSensitivity;
+                state.euler.y -= e.movementX * sens;
+                state.euler.x -= e.movementY * sens;
+                state.euler.x = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, state.euler.x));
+
+                camera.quaternion.setFromEuler(state.euler);
             });
-            
-            // Click para activar audio
-            document.addEventListener('click', () => {
-                if (musicAudio && musicEnabled) {
-                    musicAudio.play().catch(() => {});
-                }
-            }, { once: true });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
         }
 
-        // --- RESIZE ---
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        console.log('🌀 Dreamcore 3D - Camino Infinito');
-        console.log('🎮 WASD para caminar · Espacio para saltar');
-        console.log('👣 Sonido de pasos incluido');
-        console.log('👁️ Árboles con efecto Baldi');
+        console.log('🌀 Dreamcore · Primera Persona');
+        console.log('🎮 S · Adelante | W · Atrás');
+        console.log('🖱️ Mouse · Mirar');
+        console.log('␣ Espacio · Saltar');
+        console.log('1,2,3 · Velocidad');
+        console.log('M · Silenciar música');
+        console.log('👁️ Árboles 2D con efecto Baldi (billboard)');
     </script>
 </body>
 </html>
